@@ -1,0 +1,35 @@
+// complement.test.gg -- Buleyean complement distribution tests
+//
+// Verifies the core formula behaves correctly across edge cases.
+
+(test_suite:TestSuite { name: "buleyean-complement" })
+
+// Test 1: Empty boundary produces uniform distribution
+(uniform:Verify { module: "./complement.gg", invariant: "empty_is_uniform" })
+
+// Test 2: Single dimension always has probability 1
+(single:Verify { module: "./complement.gg", invariant: "single_dim_is_one" })
+
+// Test 3: Weights are exactly T - v_i + 1
+(weight_formula:Verify { module: "./complement.gg", invariant: "weight_formula_exact" })
+
+// Test 4: Distribution differs from gnosis softmax
+(not_softmax:Verify { module: "./complement.gg", invariant: "differs_from_softmax" })
+
+// Test 5: KL divergence between Buleyean and softmax is finite
+(kl_finite:Verify { module: "./complement.gg", invariant: "kl_divergence_finite" })
+
+// Test 6: Sampling respects distribution shape
+(sampling:Verify { module: "./complement.gg", invariant: "sampling_respects_distribution" })
+
+// Fork all tests
+(test_suite)-[:FORK]->(uniform | single | weight_formula | not_softmax | kl_finite | sampling)
+
+(uniform)-[:RACE { expect: "safe" }]->(r1:Result)
+(single)-[:RACE { expect: "safe" }]->(r2:Result)
+(weight_formula)-[:RACE { expect: "safe" }]->(r3:Result)
+(not_softmax)-[:RACE { expect: "safe" }]->(r4:Result)
+(kl_finite)-[:RACE { expect: "safe" }]->(r5:Result)
+(sampling)-[:RACE { expect: "safe" }]->(r6:Result)
+
+(r1 | r2 | r3 | r4 | r5 | r6)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)

@@ -1,0 +1,39 @@
+// frequentist-update.gg -- Direct observation counting
+//
+// The frequentist layer is the raw void boundary: count rejections,
+// compute Buleyean distribution. No priors, no terminal constraints,
+// just data. Maps to BoundaryStack layer 2 (timescale: minutes).
+//
+// This is the simplest layer -- it maps to the core formula applied directly.
+
+// ── Inputs ──────────────────────────────────────────────────────────
+
+(observation:Parameter { value: "null", description: "new data point to process" })
+(void_boundary:Parameter { value: "[]" })
+
+// ── Observation Processing ──────────────────────────────────────────
+
+(classify:Logic { op: "rejection_predicate", description: "is this observation a rejection?" })
+
+(observation)-[:PROCESS]->(classify)
+
+// ── Fork: accept or reject ──────────────────────────────────────────
+
+(accepted:Result { kind: "ok" })
+(rejected:Result { kind: "err" })
+
+(classify)-[:FORK]->(accepted | rejected)
+
+// ── Update boundary on rejection ───────────────────────────────────
+
+(update:GradientStep { learningRate: "1", parameterKey: "void_boundary", gradientKey: "rejection_dim" })
+
+(rejected)-[:PROCESS]->(update)
+(update)-[:PROCESS]->(void_boundary)
+(accepted)-[:PROCESS]->(void_boundary)
+
+// ── Recompute Buleyean distribution ────────────────────────────────
+
+(recompute:Logic { op: "buleyean_distribution" })
+(void_boundary)-[:PROCESS]->(recompute)
+(recompute)-[:PROCESS]->(posterior:Result { kind: "ok", description: "frequentist posterior" })

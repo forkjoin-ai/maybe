@@ -1,0 +1,49 @@
+@topology thermodynamics
+@description "Fork/Race/Fold thermodynamic accounting"
+@version "1.0.0"
+
+# First Law: V_fork = W_fold + Q_vent
+# Fork creates potential. Fold extracts work. Vent dissipates waste.
+
+node fork_energy {
+  type: FORK
+  description: "Create N parallel paths -- potential energy V = kT ln2 * log2(N)"
+  beta1_delta: +N
+}
+
+node race_selection {
+  type: RACE
+  description: "Select winner among N candidates -- kinetic conversion"
+  beta1_delta: 0
+}
+
+node fold_work {
+  type: FOLD
+  description: "Extract decision from selected winner -- useful work W"
+  beta1_delta: -N+1
+}
+
+node vent_heat {
+  type: VENT
+  description: "Dissipate rejected alternatives -- waste heat Q = V - W"
+  beta1_delta: -1
+}
+
+# Conservation: fork entropy = fold work + vent heat
+edge fork_energy -> race_selection { type: FORK }
+edge race_selection -> fold_work { type: RACE }
+edge race_selection -> vent_heat { type: VENT }
+
+# Landauer floor: every fold from N > 1 pays at least kT ln 2
+node landauer_floor {
+  type: FOLD
+  description: "Minimum heat: kT ln 2 per bit erased"
+  invariant: "heat >= kT_ln2 * entropy_reduction"
+}
+
+# Carnot ceiling: fold cannot extract more work than Shannon entropy
+node carnot_bound {
+  type: FOLD
+  description: "Maximum work: H(input) bits"
+  invariant: "work <= shannon_entropy(input)"
+}

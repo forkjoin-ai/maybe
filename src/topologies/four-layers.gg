@@ -1,0 +1,71 @@
+// four-layers.gg -- Full Buleyean system as BoundaryStack
+//
+// Four layers ordered deepest to shallowest:
+//   Layer 0: Retrocausal  (lifetime)    -- terminal constraints
+//   Layer 1: Bayesian     (weeks)       -- prior-posterior cycling
+//   Layer 2: Frequentist  (minutes)     -- direct observation
+//   Layer 3: Solomonoff   (generational) -- complexity priors
+//
+// Upward: deeper constrains shallower (retrocausal shapes everything)
+// Downward: shallower contextualizes deeper (observations update fate)
+// Cross-layer resonance: retrocausal <-> solomonoff
+
+// ── Layer Boundaries ────────────────────────────────────────────────
+
+(retrocausal:Parameter { value: "[]", timescale: "lifetime", layer: "0" })
+(bayesian:Parameter { value: "[]", timescale: "weeks", layer: "1" })
+(frequentist:Parameter { value: "[]", timescale: "minutes", layer: "2" })
+(solomonoff:Parameter { value: "[]", timescale: "generational", layer: "3" })
+
+// ── Initialization ──────────────────────────────────────────────────
+
+(init_terminal:Logic { op: "encode_terminal_states" })
+(init_complexity:Logic { op: "solomonoff_init" })
+
+(init_terminal)-[:PROCESS]->(retrocausal)
+(init_complexity)-[:PROCESS]->(solomonoff)
+
+// ── Upward Constraint Flow ──────────────────────────────────────────
+
+(up_01:Logic { op: "upward_constraint", strength: "0.1" })
+(up_12:Logic { op: "upward_constraint", strength: "0.1" })
+(up_23:Logic { op: "upward_constraint", strength: "0.1" })
+
+(retrocausal)-[:PROCESS]->(up_01)
+(up_01)-[:PROCESS]->(bayesian)
+
+(bayesian)-[:PROCESS]->(up_12)
+(up_12)-[:PROCESS]->(frequentist)
+
+(frequentist)-[:PROCESS]->(up_23)
+(up_23)-[:PROCESS]->(solomonoff)
+
+// ── Downward Context Flow ───────────────────────────────────────────
+
+(down_32:Logic { op: "downward_context", strength: "0.05" })
+(down_21:Logic { op: "downward_context", strength: "0.05" })
+(down_10:Logic { op: "downward_context", strength: "0.05" })
+
+(solomonoff)-[:PROCESS]->(down_32)
+(down_32)-[:PROCESS]->(frequentist)
+
+(frequentist)-[:PROCESS]->(down_21)
+(down_21)-[:PROCESS]->(bayesian)
+
+(bayesian)-[:PROCESS]->(down_10)
+(down_10)-[:PROCESS]->(retrocausal)
+
+// ── Cross-Layer Resonance ───────────────────────────────────────────
+
+(resonance_03:Logic { op: "resonance", strength: "0.08", description: "terminal fate shapes complexity prior" })
+(resonance_30:Logic { op: "resonance", strength: "0.03", description: "complexity prior influences fate" })
+
+(retrocausal)-[:ENTANGLE { strength: "0.08" }]->(solomonoff)
+(solomonoff)-[:ENTANGLE { strength: "0.03" }]->(retrocausal)
+
+// ── Stack Measurement ───────────────────────────────────────────────
+
+(measure_stack:Logic { op: "measure_buleyean_stack" })
+
+(retrocausal | bayesian | frequentist | solomonoff)-[:FOLD]->(measure_stack)
+(measure_stack)-[:PROCESS]->(state:Result { kind: "ok", description: "full four-layer Buleyean state" })

@@ -1,0 +1,33 @@
+// solomonoff-init.gg -- Complexity-weighted initialization
+//
+// The Solomonoff layer seeds the void boundary with complexity estimates.
+// Simpler hypotheses start with less void = higher Buleyean probability.
+// Complex hypotheses start deeper = lower probability but still positive.
+//
+// Maps to BoundaryStack layer 3 (shallowest, timescale: generational)
+
+// ── Inputs ──────────────────────────────────────────────────────────
+
+(hypotheses:Parameter { value: "[]", description: "set of hypotheses to initialize" })
+(void_boundary:Parameter { value: "[]" })
+
+// ── Complexity Estimation ───────────────────────────────────────────
+
+(estimate:Logic { op: "estimate_complexity", method: "description_length" })
+(scale:Logic { op: "scale_complexity", factor: "1.0" })
+
+(hypotheses)-[:PROCESS]->(estimate)
+(estimate)-[:PROCESS]->(scale)
+
+// ── Void Initialization ────────────────────────────────────────────
+
+(init:GradientStep { learningRate: "1", parameterKey: "void_boundary", gradientKey: "complexity" })
+
+(scale)-[:PROCESS]->(init)
+(init)-[:PROCESS]->(void_boundary)
+
+// ── Output: initialized boundary ───────────────────────────────────
+
+(buleyean_prior:Logic { op: "buleyean_distribution" })
+(void_boundary)-[:PROCESS]->(buleyean_prior)
+(buleyean_prior)-[:PROCESS]->(prior:Result { kind: "ok", description: "Solomonoff-Buleyean prior" })

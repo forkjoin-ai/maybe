@@ -1,0 +1,73 @@
+// curvature-detector.gg -- Fraud detection on the statistical manifold
+//
+// The probability simplex with the Fisher Information Metric is a curved
+// surface. Frequentism (b_2 = 0) is the flat floor. The other Buleyean
+// layers introduce curvature. A truthful distribution follows geodesics.
+// A fraudulent one bends off the natural path.
+//
+// This topology computes the geodesic curvature of a trajectory and
+// flags anomalous bending as potential statistical fraud.
+//
+// The "impossible" element: visualizing the curvature of a lie versus
+// a truth. If physical constants are being "fudged" by a higher-order
+// simulation, the distribution of observations would show anomalous
+// geodesic curvature on the Fisher manifold.
+
+// ── Inputs ──────────────────────────────────────────────────────────
+
+(trajectory:Parameter { value: "[]", description: "sequence of observed distributions" })
+(reference:Parameter { value: "null", description: "optional trusted reference trajectory" })
+
+// ── Fisher Manifold Embedding ───────────────────────────────────────
+
+(embed:Logic { op: "fisher_rao_embed", description: "map distributions to points on the Fisher manifold" })
+(trajectory)-[:PROCESS]->(embed)
+
+// ── Geodesic Computation ────────────────────────────────────────────
+
+(geodesic:Logic { op: "geodesic_path", description: "compute the natural geodesic between start and end" })
+(embed)-[:PROCESS]->(geodesic)
+
+// ── Curvature Analysis ──────────────────────────────────────────────
+// Fork: compute curvature properties in parallel
+
+(kappa:Logic { op: "geodesic_curvature", description: "per-point curvature along trajectory" })
+(winding:Logic { op: "winding_ratio", description: "path_length / geodesic_distance" })
+(spikes:Logic { op: "curvature_spikes", description: "anomalous curvature maxima" })
+
+(embed)-[:FORK]->(kappa | winding | spikes)
+
+// ── Fraud Score ─────────────────────────────────────────────────────
+// Fold curvature signals into a single fraud score
+
+(score:Logic { op: "composite_fraud_score", description: "winding + variance + spike detection" })
+(kappa | winding | spikes)-[:FOLD { strategy: "weighted_sum" }]->(score)
+
+// ── Comparative Analysis (if reference provided) ────────────────────
+
+(compare:Logic { op: "compare_fraud", description: "relative fraud: suspect vs reference" })
+(reference)-[:PROCESS]->(compare)
+(score)-[:PROCESS]->(compare)
+
+// ── Verdict ─────────────────────────────────────────────────────────
+
+(threshold:Logic { op: "fraud_threshold", description: "fraud_score > threshold => suspicious" })
+(compare)-[:PROCESS]->(threshold)
+
+(threshold)-[:FORK]->(clean | suspicious)
+(clean:Result { kind: "ok", description: "trajectory follows natural geodesic" })
+(suspicious:Result { kind: "err", description: "anomalous curvature detected -- statistical fraud" })
+
+// ── Layer Coordinate Decomposition ──────────────────────────────────
+// Which Buleyean layer is causing the curvature?
+
+(layer_decompose:Logic { op: "manifold_coordinates", description: "decompose curvature by layer" })
+(embed)-[:PROCESS]->(layer_decompose)
+
+(b0:Logic { op: "retrocausal_curvature", coordinate: "b0" })
+(b1:Logic { op: "bayesian_curvature", coordinate: "b1" })
+(b2:Logic { op: "frequentist_curvature", coordinate: "b2" })
+(b3:Logic { op: "solomonoff_curvature", coordinate: "b3" })
+
+(layer_decompose)-[:FORK]->(b0 | b1 | b2 | b3)
+(b0 | b1 | b2 | b3)-[:FOLD]->(curvature_source:Result { kind: "ok", description: "which layer bends the manifold" })

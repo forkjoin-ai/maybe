@@ -1,0 +1,47 @@
+@topology deficit-weighted-fold
+@description "Glossolalia semiotic ensemble: fold k agents to one stream"
+@version "1.0.0"
+
+# The agent that disagrees most gets the highest weight.
+# This preserves the most information-rich perspective.
+# Semiotic deficit = (k-1) + (V-K) for k agents, V vocab, top-K sparse.
+
+node fork_agents {
+  type: FORK
+  description: "Fork into k parallel agent perspectives"
+  beta1_delta: +k
+}
+
+node race_predictions {
+  type: RACE
+  description: "Each agent produces a distribution over vocabulary"
+}
+
+node compute_mean {
+  type: FOLD
+  description: "Mean distribution: center of mass on Fisher manifold"
+}
+
+node compute_divergences {
+  type: FORK
+  description: "L2 divergence of each agent from mean"
+  beta1_delta: +k
+}
+
+node weight_by_deficit {
+  type: FOLD
+  description: "Weight proportional to divergence: disagreement = information"
+  beta1_delta: -(k-1)
+}
+
+node vent_agreement {
+  type: VENT
+  description: "Vent the agreed-upon component (no new information)"
+  beta1_delta: -1
+}
+
+edge fork_agents -> race_predictions { type: FORK }
+edge race_predictions -> compute_mean { type: FOLD }
+edge compute_mean -> compute_divergences { type: FORK }
+edge compute_divergences -> weight_by_deficit { type: FOLD }
+edge race_predictions -> vent_agreement { type: VENT }

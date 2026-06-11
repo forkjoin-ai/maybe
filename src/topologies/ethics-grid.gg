@@ -1,0 +1,56 @@
+// ethics-grid.gg -- Eight compiler checks as theorem nodes
+//
+// The eight ethical axioms of Buleyean probability, expressed as
+// verification nodes. Each check is a theorem that must hold for
+// the system to be sound. Fork all checks, race to completion,
+// fold to a single verdict.
+//
+// These correspond to the mechanized theorems in Lean 4:
+// BuleyeanProbability.lean, VoidWalking.lean, SolomonoffBuleyean.lean, RetrocausalBound.lean
+
+// ── Theorem Nodes ───────────────────────────────────────────────────
+
+(grid:Parameter { value: "ethics-grid", description: "eight compiler checks" })
+
+// Axiom 1: Positivity -- P(i) > 0 for all i
+(positivity:Logic { op: "assert_positivity", theorem: "buleyean_positive" })
+
+// Axiom 2: Normalization -- sum(P) = 1
+(normalization:Logic { op: "assert_normalization", theorem: "buleyean_normalized" })
+
+// Axiom 3: Monotonicity -- v_i < v_j => P(i) > P(j)
+(monotonicity:Logic { op: "assert_monotonicity", theorem: "buleyean_monotone" })
+
+// Axiom 4: Retrocausal bound -- terminal void propagates
+(retrocausal:Logic { op: "verify_retrocausal_bound", theorem: "retrocausal_propagation" })
+
+// Axiom 5: Solomonoff consistency -- complexity ordering preserved
+(solomonoff:Logic { op: "verify_solomonoff_ordering", theorem: "solomonoff_buleyean_consistent" })
+
+// Axiom 6: Layer coherence -- upward constraints don't violate positivity
+(layer_coherence:Logic { op: "verify_layer_coherence", theorem: "stack_positivity_preserved" })
+
+// Axiom 7: Convergence -- inverse Bule is non-negative
+(convergence:Logic { op: "verify_convergence", theorem: "inverse_bule_nonneg" })
+
+// Axiom 8: Self-consistency -- Buleyean of Buleyean = Buleyean (idempotence)
+(idempotence:Logic { op: "verify_idempotence", theorem: "buleyean_idempotent" })
+
+// ── Fork all checks ────────────────────────────────────────────────
+
+(grid)-[:FORK]->(positivity | normalization | monotonicity | retrocausal | solomonoff | layer_coherence | convergence | idempotence)
+
+// ── Race to completion ──────────────────────────────────────────────
+
+(positivity)-[:RACE { expect: "safe" }]->(r1:Result)
+(normalization)-[:RACE { expect: "safe" }]->(r2:Result)
+(monotonicity)-[:RACE { expect: "safe" }]->(r3:Result)
+(retrocausal)-[:RACE { expect: "safe" }]->(r4:Result)
+(solomonoff)-[:RACE { expect: "safe" }]->(r5:Result)
+(layer_coherence)-[:RACE { expect: "safe" }]->(r6:Result)
+(convergence)-[:RACE { expect: "safe" }]->(r7:Result)
+(idempotence)-[:RACE { expect: "safe" }]->(r8:Result)
+
+// ── Fold to verdict ────────────────────────────────────────────────
+
+(r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict { description: "all eight ethical axioms hold" })

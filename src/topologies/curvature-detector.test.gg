@@ -1,0 +1,44 @@
+// curvature-detector.test.gg -- Manifold fraud detection tests
+//
+// Verifies that the curvature detector correctly distinguishes
+// geodesic (truthful) trajectories from bent (fraudulent) ones.
+
+(test_suite:TestSuite { name: "curvature-detector" })
+
+// Test 1: Geodesic path has zero fraud score
+(geodesic_clean:Verify { module: "./curvature-detector.gg", invariant: "geodesic_path_zero_fraud" })
+
+// Test 2: Zigzag trajectory has high fraud score
+(zigzag_fraud:Verify { module: "./curvature-detector.gg", invariant: "zigzag_high_fraud" })
+
+// Test 3: Winding ratio is 1.0 for geodesics
+(winding_one:Verify { module: "./curvature-detector.gg", invariant: "geodesic_winding_ratio_one" })
+
+// Test 4: Fisher-Rao distance satisfies triangle inequality
+(triangle:Verify { module: "./curvature-detector.gg", invariant: "fisher_rao_triangle_inequality" })
+
+// Test 5: Fisher metric is positive definite
+(pos_def:Verify { module: "./curvature-detector.gg", invariant: "fisher_metric_positive_definite" })
+
+// Test 6: Layer coordinates decompose total curvature
+(decompose:Verify { module: "./curvature-detector.gg", invariant: "layer_decomposition_consistent" })
+
+// Test 7: Comparative fraud detection ranks correctly
+(comparative:Verify { module: "./curvature-detector.gg", invariant: "comparative_ranking_correct" })
+
+// Test 8: Scalar curvature matches (n-1)(n-2)/4
+(scalar:Verify { module: "./curvature-detector.gg", invariant: "scalar_curvature_formula" })
+
+// Fork all tests
+(test_suite)-[:FORK]->(geodesic_clean | zigzag_fraud | winding_one | triangle | pos_def | decompose | comparative | scalar)
+
+(geodesic_clean)-[:RACE { expect: "safe" }]->(r1:Result)
+(zigzag_fraud)-[:RACE { expect: "safe" }]->(r2:Result)
+(winding_one)-[:RACE { expect: "safe" }]->(r3:Result)
+(triangle)-[:RACE { expect: "safe" }]->(r4:Result)
+(pos_def)-[:RACE { expect: "safe" }]->(r5:Result)
+(decompose)-[:RACE { expect: "safe" }]->(r6:Result)
+(comparative)-[:RACE { expect: "safe" }]->(r7:Result)
+(scalar)-[:RACE { expect: "safe" }]->(r8:Result)
+
+(r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)

@@ -1,0 +1,43 @@
+// four-layers.test.gg -- Full BoundaryStack verification
+//
+// Tests that the four-layer Buleyean system maintains invariants.
+
+(test_suite:TestSuite { name: "buleyean-four-layers" })
+
+// Test 1: Stack creates with correct timescales
+(timescales:Verify { module: "./four-layers.gg", invariant: "timescales_correct" })
+
+// Test 2: Upward constraints flow deepest-to-shallowest
+(upward:Verify { module: "./four-layers.gg", invariant: "upward_constraint_flows" })
+
+// Test 3: Downward context flows shallowest-to-deepest
+(downward:Verify { module: "./four-layers.gg", invariant: "downward_context_flows" })
+
+// Test 4: Retrocausal-Solomonoff resonance couples
+(resonance:Verify { module: "./four-layers.gg", invariant: "cross_layer_resonance_active" })
+
+// Test 5: All layers maintain positivity after tick
+(pos_after_tick:Verify { module: "./four-layers.gg", invariant: "positivity_after_tick" })
+
+// Test 6: Retrocausal layer constrains Bayesian
+(retro_constrains:Verify { module: "./four-layers.gg", invariant: "retrocausal_constrains_bayesian" })
+
+// Test 7: Solomonoff initialization respects complexity ordering
+(complexity:Verify { module: "./four-layers.gg", invariant: "complexity_ordering_preserved" })
+
+// Test 8: Stack measurement is consistent
+(measurement:Verify { module: "./four-layers.gg", invariant: "stack_measurement_consistent" })
+
+// Fork all tests
+(test_suite)-[:FORK]->(timescales | upward | downward | resonance | pos_after_tick | retro_constrains | complexity | measurement)
+
+(timescales)-[:RACE { expect: "safe" }]->(r1:Result)
+(upward)-[:RACE { expect: "safe" }]->(r2:Result)
+(downward)-[:RACE { expect: "safe" }]->(r3:Result)
+(resonance)-[:RACE { expect: "safe" }]->(r4:Result)
+(pos_after_tick)-[:RACE { expect: "safe" }]->(r5:Result)
+(retro_constrains)-[:RACE { expect: "safe" }]->(r6:Result)
+(complexity)-[:RACE { expect: "safe" }]->(r7:Result)
+(measurement)-[:RACE { expect: "safe" }]->(r8:Result)
+
+(r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)

@@ -1,0 +1,47 @@
+// axioms.test.gg -- Three axioms verification
+//
+// Tests that the three Buleyean axioms hold under various boundary states.
+
+(test_suite:TestSuite { name: "buleyean-axioms" })
+
+// Test 1: Positivity holds on empty boundary
+(empty_pos:Verify { module: "./complement.gg", invariant: "positivity_empty_boundary" })
+
+// Test 2: Positivity holds on saturated boundary
+(sat_pos:Verify { module: "./complement.gg", invariant: "positivity_saturated_boundary" })
+
+// Test 3: Positivity holds on asymmetric boundary
+(asym_pos:Verify { module: "./complement.gg", invariant: "positivity_asymmetric_boundary" })
+
+// Test 4: Normalization on empty boundary
+(empty_norm:Verify { module: "./complement.gg", invariant: "normalization_empty" })
+
+// Test 5: Normalization on large T
+(large_norm:Verify { module: "./complement.gg", invariant: "normalization_large_t" })
+
+// Test 6: Normalization after many updates
+(update_norm:Verify { module: "./complement.gg", invariant: "normalization_after_updates" })
+
+// Test 7: Monotonicity -- less void = more weight
+(mono_basic:Verify { module: "./complement.gg", invariant: "monotonicity_basic" })
+
+// Test 8: Monotonicity -- equal void = equal weight
+(mono_equal:Verify { module: "./complement.gg", invariant: "monotonicity_equal_void" })
+
+// Test 9: All three axioms hold simultaneously after random walk
+(all_three:Verify { module: "./complement.gg", invariant: "all_axioms_random_walk" })
+
+// Fork all tests, race to completion, fold to verdict
+(test_suite)-[:FORK]->(empty_pos | sat_pos | asym_pos | empty_norm | large_norm | update_norm | mono_basic | mono_equal | all_three)
+
+(empty_pos)-[:RACE { expect: "safe" }]->(r1:Result)
+(sat_pos)-[:RACE { expect: "safe" }]->(r2:Result)
+(asym_pos)-[:RACE { expect: "safe" }]->(r3:Result)
+(empty_norm)-[:RACE { expect: "safe" }]->(r4:Result)
+(large_norm)-[:RACE { expect: "safe" }]->(r5:Result)
+(update_norm)-[:RACE { expect: "safe" }]->(r6:Result)
+(mono_basic)-[:RACE { expect: "safe" }]->(r7:Result)
+(mono_equal)-[:RACE { expect: "safe" }]->(r8:Result)
+(all_three)-[:RACE { expect: "safe" }]->(r9:Result)
+
+(r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8 | r9)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)

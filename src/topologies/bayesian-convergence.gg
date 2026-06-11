@@ -1,0 +1,50 @@
+// bayesian-convergence.gg -- Prior-posterior update cycle
+//
+// The Bayesian layer maintains priors as void boundary state and
+// updates via the Buleyean formula. Convergence = inverse Bule
+// decreasing toward zero. Maps to BoundaryStack layer 1 (timescale: weeks).
+//
+// Prior = void boundary at time t
+// Likelihood = new rejection observations
+// Posterior = Buleyean distribution at time t+1
+
+// ── State ───────────────────────────────────────────────────────────
+
+(prior_boundary:Parameter { value: "[]", description: "prior void boundary state" })
+(evidence:Parameter { value: "null", description: "new evidence to incorporate" })
+
+// ── Prior Distribution ──────────────────────────────────────────────
+
+(prior_dist:Logic { op: "buleyean_distribution", source: "prior_boundary" })
+(prior_boundary)-[:PROCESS]->(prior_dist)
+
+// ── Evidence Processing ─────────────────────────────────────────────
+
+(likelihood:Logic { op: "rejection_predicate" })
+(evidence)-[:PROCESS]->(likelihood)
+
+// ── Fork: evidence accepted or rejected ─────────────────────────────
+
+(evidence_accept:Result { kind: "ok" })
+(evidence_reject:Result { kind: "err" })
+
+(likelihood)-[:FORK]->(evidence_accept | evidence_reject)
+
+// ── Posterior Update ────────────────────────────────────────────────
+
+(update_prior:GradientStep { learningRate: "1", parameterKey: "prior_boundary", gradientKey: "evidence" })
+
+(evidence_reject)-[:PROCESS]->(update_prior)
+(update_prior)-[:PROCESS]->(prior_boundary)
+(evidence_accept)-[:PROCESS]->(prior_boundary)
+
+// ── Posterior Distribution ──────────────────────────────────────────
+
+(posterior_dist:Logic { op: "buleyean_distribution", source: "prior_boundary" })
+(prior_boundary)-[:PROCESS]->(posterior_dist)
+
+// ── Convergence Check ───────────────────────────────────────────────
+
+(convergence:Logic { op: "inverse_bule", description: "entropy reduction rate -- approaches 0 at convergence" })
+(posterior_dist)-[:PROCESS]->(convergence)
+(convergence)-[:PROCESS]->(converged:Result { kind: "ok", description: "Bayesian convergence state" })

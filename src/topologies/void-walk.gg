@@ -1,0 +1,61 @@
+// void-walk.gg -- Buleyean c0-c3 walking loop
+//
+// Same c0-c3 metacognitive loop as gnosis void walking, but using
+// the Buleyean distribution instead of softmax complement.
+//
+// c0: Choose from Buleyean distribution + update boundary
+// c1: Measure distribution shape (entropy, kurtosis)
+// c2: Select gait from kurtosis
+// c3: Adapt parameters from gait
+
+// ── State ───────────────────────────────────────────────────────────
+
+(void_boundary:Parameter { value: "[]" })
+(buleyean_dist:Logic { op: "buleyean_distribution", formula: "(T - v_i + 1) / sum" })
+
+(void_boundary)-[:PROCESS]->(buleyean_dist)
+
+// ── c0: Choose + Execute ────────────────────────────────────────────
+
+(choose:Logic { op: "sample_buleyean" })
+(execute:Logic { op: "domain_step" })
+(observe:Logic { op: "rejection_predicate" })
+
+(buleyean_dist)-[:PROCESS]->(choose)
+(choose)-[:PROCESS]->(execute)
+(execute)-[:FORK]->(observe | accept)
+
+// ── c0: Update void ────────────────────────────────────────────────
+
+(accept:Result { kind: "ok" })
+(reject:Result { kind: "err" })
+(void_update:GradientStep { learningRate: "1", parameterKey: "void_boundary", gradientKey: "rejection" })
+
+(observe)-[:FORK]->(accept | reject)
+(accept)-[:PROCESS]->(sink:Sink)
+(reject)-[:PROCESS]->(void_update)
+(void_update)-[:PROCESS]->(void_boundary)
+
+// ── c1: Measure ─────────────────────────────────────────────────────
+
+(entropy:Logic { op: "shannon_entropy" })
+(kurtosis:Logic { op: "excess_kurtosis" })
+(inverse_bule:Logic { op: "inverse_bule" })
+
+(buleyean_dist)-[:FORK]->(entropy | kurtosis | inverse_bule)
+
+// ── c2: Select gait ────────────────────────────────────────────────
+
+(gait_select:Logic { op: "select_gait" })
+
+(kurtosis | entropy | inverse_bule)-[:FOLD]->(gait_select)
+
+// ── c3: Adapt ──────────────────────────────────────────────────────
+
+(adapt:GradientStep { learningRate: "0.1", parameterKey: "exploration", gradientKey: "gait" })
+
+(gait_select)-[:PROCESS]->(adapt)
+
+// ── Feedback loop ──────────────────────────────────────────────────
+
+(adapt)-[:PROCESS]->(void_boundary)

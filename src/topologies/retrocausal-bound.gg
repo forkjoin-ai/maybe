@@ -1,0 +1,47 @@
+// retrocausal-bound.gg -- Terminal state constrains trajectory
+//
+// The retrocausal layer encodes terminal states (what must be avoided)
+// and propagates their void backward through the adjacency structure.
+// Maps to BoundaryStack layer 0 (deepest, timescale: lifetime).
+//
+// Theorem: terminal_void(s) > 0 => ancestor_void(s, t) > 0 for all t < T
+
+// ── Inputs ──────────────────────────────────────────────────────────
+
+(terminal_states:Parameter { value: "[]", description: "absorbing boundaries to avoid" })
+(adjacency:Parameter { value: "[]", description: "graph structure for backward propagation" })
+(void_boundary:Parameter { value: "[]" })
+
+// ── Terminal Encoding ───────────────────────────────────────────────
+
+(encode:Logic { op: "encode_terminal_states", description: "massive initial void for terminal dimensions" })
+
+(terminal_states)-[:PROCESS]->(encode)
+(encode)-[:PROCESS]->(void_boundary)
+
+// ── Backward Propagation ────────────────────────────────────────────
+
+(propagate:Logic { op: "propagate_backward", factor: "0.5", maxHops: "3" })
+
+(void_boundary)-[:PROCESS]->(propagate)
+(adjacency)-[:PROCESS]->(propagate)
+(propagate)-[:PROCESS]->(void_boundary)
+
+// ── Bound Verification ──────────────────────────────────────────────
+
+(verify:Logic { op: "verify_retrocausal_bound" })
+
+(void_boundary)-[:PROCESS]->(verify)
+(terminal_states)-[:PROCESS]->(verify)
+(adjacency)-[:PROCESS]->(verify)
+
+// ── Output ──────────────────────────────────────────────────────────
+
+(buleyean_dist:Logic { op: "buleyean_distribution" })
+(void_boundary)-[:PROCESS]->(buleyean_dist)
+
+(verify)-[:FORK]->(bound_holds | bound_violated)
+(bound_holds:Result { kind: "ok", description: "retrocausal bound satisfied" })
+(bound_violated:Result { kind: "err", description: "retrocausal bound violated -- terminal state reachable" })
+
+(buleyean_dist)-[:PROCESS]->(constrained:Result { kind: "ok", description: "retrocausally constrained distribution" })

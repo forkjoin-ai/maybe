@@ -1,0 +1,39 @@
+// void-walk.test.gg -- Buleyean void walking loop tests
+//
+// Verifies that the c0-c3 loop with Buleyean distribution converges.
+
+(test_suite:TestSuite { name: "buleyean-void-walk" })
+
+// Test 1: Walker converges (inverse Bule decreases)
+(converge:Verify { module: "./void-walk.gg", invariant: "inverse_bule_decreasing" })
+
+// Test 2: Gait transitions are valid (stand -> trot -> canter -> gallop)
+(gait:Verify { module: "./void-walk.gg", invariant: "gait_transitions_valid" })
+
+// Test 3: Void boundary grows monotonically
+(boundary:Verify { module: "./void-walk.gg", invariant: "void_boundary_monotone" })
+
+// Test 4: Axioms hold at every step of the walk
+(axioms_always:Verify { module: "./void-walk.gg", invariant: "axioms_hold_every_step" })
+
+// Test 5: Exploration rate stays bounded
+(exploration:Verify { module: "./void-walk.gg", invariant: "exploration_bounded" })
+
+// Test 6: Entropy decreases over time (information gained)
+(entropy:Verify { module: "./void-walk.gg", invariant: "entropy_nonincreasing_trend" })
+
+// Test 7: Distribution remains valid after 1000 steps
+(long_run:Verify { module: "./void-walk.gg", invariant: "distribution_valid_1000_steps" })
+
+// Fork all tests
+(test_suite)-[:FORK]->(converge | gait | boundary | axioms_always | exploration | entropy | long_run)
+
+(converge)-[:RACE { expect: "safe" }]->(r1:Result)
+(gait)-[:RACE { expect: "safe" }]->(r2:Result)
+(boundary)-[:RACE { expect: "safe" }]->(r3:Result)
+(axioms_always)-[:RACE { expect: "safe" }]->(r4:Result)
+(exploration)-[:RACE { expect: "safe" }]->(r5:Result)
+(entropy)-[:RACE { expect: "safe" }]->(r6:Result)
+(long_run)-[:RACE { expect: "safe" }]->(r7:Result)
+
+(r1 | r2 | r3 | r4 | r5 | r6 | r7)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)
