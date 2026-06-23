@@ -81,9 +81,17 @@ export function propagateBackward(
   // Build reverse adjacency: who can reach dimension i?
   const reverseAdj: number[][] = Array.from({ length: n }, () => []);
   for (let i = 0; i < adjacency.length; i++) {
-    for (const target of adjacency[i]) {
+    const targets = adjacency[i];
+    if (targets === undefined) {
+      continue;
+    }
+    for (const target of targets) {
       if (target >= 0 && target < n) {
-        reverseAdj[target].push(i);
+        const ancestors = reverseAdj[target];
+        if (ancestors === undefined) {
+          continue;
+        }
+        ancestors.push(i);
       }
     }
   }
@@ -99,11 +107,17 @@ export function propagateBackward(
 
     // FORK: all dimensions compute independently per hop
     for (let i = 0; i < n; i++) {
-      if (boundary.counts[i] > 0) {
-        const propagated = boundary.counts[i] * propagationFactor * hopDecay;
-        for (const ancestor of reverseAdj[i]) {
-          additions[ancestor] += propagated;
-        }
+      const count = boundary.counts[i];
+      if (count === undefined || count <= 0) {
+        continue;
+      }
+      const ancestors = reverseAdj[i];
+      if (ancestors === undefined) {
+        continue;
+      }
+      const propagated = count * propagationFactor * hopDecay;
+      for (const ancestor of ancestors) {
+        additions[ancestor] += propagated;
       }
     }
 
@@ -145,9 +159,17 @@ export function verifyRetrocausalBound(
   // Build reverse adjacency
   const reverseAdj: number[][] = Array.from({ length: n }, () => []);
   for (let i = 0; i < adjacency.length; i++) {
-    for (const target of adjacency[i]) {
+    const targets = adjacency[i];
+    if (targets === undefined) {
+      continue;
+    }
+    for (const target of targets) {
       if (target >= 0 && target < n) {
-        reverseAdj[target].push(i);
+        const ancestors = reverseAdj[target];
+        if (ancestors === undefined) {
+          continue;
+        }
+        ancestors.push(i);
       }
     }
   }
@@ -169,13 +191,21 @@ export function verifyRetrocausalBound(
           dist,
           propagationFactor
         );
-        if (boundary.counts[idx] < minVoid * 0.5) {
+        const count = boundary.counts[idx];
+        if (count === undefined) {
+          continue;
+        }
+        if (count < minVoid * 0.5) {
           // Allow 50% tolerance for floating point and decay
           return false;
         }
       }
 
-      for (const ancestor of reverseAdj[idx]) {
+      const ancestors = reverseAdj[idx];
+      if (ancestors === undefined) {
+        continue;
+      }
+      for (const ancestor of ancestors) {
         if (!visited.has(ancestor)) {
           queue.push({ idx: ancestor, dist: dist + 1 });
         }

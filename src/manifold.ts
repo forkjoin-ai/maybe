@@ -62,8 +62,14 @@ export function fisherInnerProduct(
 ): number {
   let sum = 0;
   for (let i = 0; i < p.length; i++) {
-    if (p[i] > 0) {
-      sum += (u[i] * v[i]) / p[i];
+    const pi = p[i];
+    const ui = u[i];
+    const vi = v[i];
+    if (pi === undefined || ui === undefined || vi === undefined) {
+      throw new Error('fisherInnerProduct: missing vector component');
+    }
+    if (pi > 0) {
+      sum += (ui * vi) / pi;
     }
   }
   return sum;
@@ -88,7 +94,12 @@ export function fisherNorm(p: number[], v: number[]): number {
 export function bhattacharyyaCoefficient(p: number[], q: number[]): number {
   let bc = 0;
   for (let i = 0; i < p.length; i++) {
-    bc += Math.sqrt(p[i] * q[i]);
+    const pi = p[i];
+    const qi = q[i];
+    if (pi === undefined || qi === undefined) {
+      throw new Error('bhattacharyyaCoefficient: missing distribution value');
+    }
+    bc += Math.sqrt(pi * qi);
   }
   return Math.min(bc, 1);
 }
@@ -180,10 +191,16 @@ export function trajectoryCurvature(trajectory: number[][]): number[] {
   const len = trajectory.length - 2;
   const curvatures = new Array<number>(len);
   for (let i = 0; i < len; i++) {
+    const prev = trajectory[i];
+    const curr = trajectory[i + 1];
+    const next = trajectory[i + 2];
+    if (prev === undefined || curr === undefined || next === undefined) {
+      throw new Error('trajectoryCurvature: missing trajectory point');
+    }
     curvatures[i] = geodesicCurvature(
-      trajectory[i],
-      trajectory[i + 1],
-      trajectory[i + 2]
+      prev,
+      curr,
+      next
     );
   }
   return curvatures;
@@ -240,13 +257,25 @@ export interface ManifoldCoordinates {
  * Each layer is a point on the simplex. Curvature = distance from uniform.
  */
 export function manifoldCoordinates(stack: BoundaryStack): ManifoldCoordinates {
-  const n = stack.layers[0].boundary.counts.length;
+  const layer0 = stack.layers[0];
+  const layer1 = stack.layers[1];
+  const layer2 = stack.layers[2];
+  const layer3 = stack.layers[3];
+  if (
+    layer0 === undefined ||
+    layer1 === undefined ||
+    layer2 === undefined ||
+    layer3 === undefined
+  ) {
+    throw new Error('manifoldCoordinates: boundary stack requires four layers');
+  }
+  const n = layer0.boundary.counts.length;
   const uniform = new Array(n).fill(1 / n);
 
   // Cannon rotation: all 4 layer distributions are independent (different
   // boundaries). All 4 uniform-distance and 4 inter-layer distance
   // computations are independent. 8 parallel fisherRaoDistance calls.
-  const dists = stack.layers.map((layer) =>
+  const dists = [layer0, layer1, layer2, layer3].map((layer) =>
     buleyeanDistribution(layer.boundary)
   );
 
@@ -254,16 +283,23 @@ export function manifoldCoordinates(stack: BoundaryStack): ManifoldCoordinates {
   const distances = dists.map((d) => fisherRaoDistance(d, uniform));
 
   // FORK: 4 inter-layer distances (independent pairs)
-  const retrocausal_bayesian = fisherRaoDistance(dists[0], dists[1]);
-  const bayesian_frequentist = fisherRaoDistance(dists[1], dists[2]);
-  const frequentist_solomonoff = fisherRaoDistance(dists[2], dists[3]);
-  const retrocausal_solomonoff = fisherRaoDistance(dists[0], dists[3]);
+  const d0 = dists[0];
+  const d1 = dists[1];
+  const d2 = dists[2];
+  const d3 = dists[3];
+  if (d0 === undefined || d1 === undefined || d2 === undefined || d3 === undefined) {
+    throw new Error('manifoldCoordinates: missing distribution');
+  }
+  const retrocausal_bayesian = fisherRaoDistance(d0, d1);
+  const bayesian_frequentist = fisherRaoDistance(d1, d2);
+  const frequentist_solomonoff = fisherRaoDistance(d2, d3);
+  const retrocausal_solomonoff = fisherRaoDistance(d0, d3);
 
   return {
-    b0_retrocausal: distances[0],
-    b1_bayesian: distances[1],
-    b2_frequentist: distances[2],
-    b3_solomonoff: distances[3],
+    b0_retrocausal: distances[0] ?? 0,
+    b1_bayesian: distances[1] ?? 0,
+    b2_frequentist: distances[2] ?? 0,
+    b3_solomonoff: distances[3] ?? 0,
     totalCurvature: distances.reduce((a, b) => a + b, 0),
     interLayerDistances: {
       retrocausal_bayesian,
@@ -322,6 +358,9 @@ export interface FraudAnalysis {
  */
 export function detectFraud(trajectory: number[][]): FraudAnalysis {
   if (trajectory.length < 3) {
+    const first = trajectory[0];
+    const second = trajectory[1];
+    const last = trajectory[trajectory.length - 1];
     return {
       curvatures: [],
       totalCurvature: 0,
@@ -330,12 +369,12 @@ export function detectFraud(trajectory: number[][]): FraudAnalysis {
       meanCurvature: 0,
       curvatureStdDev: 0,
       pathLength:
-        trajectory.length === 2
-          ? fisherRaoDistance(trajectory[0], trajectory[1])
+        trajectory.length === 2 && first !== undefined && second !== undefined
+          ? fisherRaoDistance(first, second)
           : 0,
       geodesicDistance:
-        trajectory.length >= 2
-          ? fisherRaoDistance(trajectory[0], trajectory[trajectory.length - 1])
+        trajectory.length >= 2 && first !== undefined && last !== undefined
+          ? fisherRaoDistance(first, last)
           : 0,
       windingRatio: 1,
       fraudScore: 0,
@@ -348,17 +387,26 @@ export function detectFraud(trajectory: number[][]): FraudAnalysis {
   // Compute all N-1 distances in parallel, then reduce to sum.
   const segmentDistances = new Array<number>(trajectory.length - 1);
   for (let i = 0; i < trajectory.length - 1; i++) {
-    segmentDistances[i] = fisherRaoDistance(trajectory[i], trajectory[i + 1]);
+    const before = trajectory[i];
+    const after = trajectory[i + 1];
+    if (before === undefined || after === undefined) {
+      throw new Error('detectFraud: missing trajectory point');
+    }
+    segmentDistances[i] = fisherRaoDistance(before, after);
   }
   let pathLength = 0;
   for (let i = 0; i < segmentDistances.length; i++) {
-    pathLength += segmentDistances[i];
+    const segment = segmentDistances[i];
+    if (segment === undefined) {
+      throw new Error('detectFraud: missing segment distance');
+    }
+    pathLength += segment;
   }
 
   // Geodesic distance: straight line from start to end
   const geodesicDistance = fisherRaoDistance(
-    trajectory[0],
-    trajectory[trajectory.length - 1]
+    trajectory[0]!,
+    trajectory[trajectory.length - 1]!
   );
 
   // Curvature statistics
@@ -477,7 +525,12 @@ export function geodesicInterpolation(
   // Angle between the two points on the sphere
   let cosAngle = 0;
   for (let i = 0; i < n; i++) {
-    cosAngle += xi_p[i] * xi_q[i];
+    const xip = xi_p[i];
+    const xiq = xi_q[i];
+    if (xip === undefined || xiq === undefined) {
+      throw new Error('geodesicInterpolation: missing sphere coordinate');
+    }
+    cosAngle += xip * xiq;
   }
   cosAngle = Math.min(Math.max(cosAngle, -1), 1);
   const angle = Math.acos(cosAngle);
@@ -495,7 +548,12 @@ export function geodesicInterpolation(
 
   let sum = 0;
   for (let i = 0; i < n; i++) {
-    const xi = coeff_p * xi_p[i] + coeff_q * xi_q[i];
+    const xip = xi_p[i];
+    const xiq = xi_q[i];
+    if (xip === undefined || xiq === undefined) {
+      throw new Error('geodesicInterpolation: missing sphere coordinate');
+    }
+    const xi = coeff_p * xip + coeff_q * xiq;
     result[i] = xi * xi; // Back to probability: p_i = xi_i^2
     sum += result[i];
   }

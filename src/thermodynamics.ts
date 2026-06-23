@@ -275,7 +275,12 @@ export function trajectoryCost(
 ): number {
   let total = 0;
   for (let i = 1; i < trajectory.length; i++) {
-    total += transitionCost(trajectory[i - 1], trajectory[i], temperature);
+    const before = trajectory[i - 1];
+    const after = trajectory[i];
+    if (before === undefined || after === undefined) {
+      throw new Error('trajectoryCost: missing trajectory point');
+    }
+    total += transitionCost(before, after, temperature);
   }
   return total;
 }

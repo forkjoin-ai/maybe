@@ -571,7 +571,11 @@ export function chooseNextChord(
     cumulative += row[index] ?? 0;
     if (target < cumulative) return chordAt(index);
   }
-  return ROMAN_CHORDS[ROMAN_CHORDS.length - 1];
+  const finalChord = ROMAN_CHORDS[ROMAN_CHORDS.length - 1];
+  if (finalChord === undefined) {
+    throw new Error('Chordonomicon progression table is empty');
+  }
+  return finalChord;
 }
 
 export function deterministicTransitionUnit(seed: number): number {

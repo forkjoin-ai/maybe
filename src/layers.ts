@@ -63,6 +63,18 @@ export const BULEYEAN_LAYERS = [
   },
 ] as const;
 
+function requireLayer(
+  stack: BoundaryStack,
+  index: number,
+  label: string
+): TimescaleBoundary {
+  const layer = stack.layers[index];
+  if (layer === undefined) {
+    throw new Error(`Missing ${label} layer`);
+  }
+  return layer;
+}
+
 // ============================================================================
 // Stack Creation
 // ============================================================================
@@ -114,7 +126,10 @@ export function getLayer(
   name: 'retrocausal' | 'bayesian' | 'frequentist' | 'solomonoff'
 ): TimescaleBoundary {
   const idx = BULEYEAN_LAYERS.findIndex((l) => l.name === name);
-  return stack.layers[idx];
+  if (idx < 0) {
+    throw new Error(`Unknown layer: ${name}`);
+  }
+  return requireLayer(stack, idx, name);
 }
 
 /**
@@ -149,10 +164,14 @@ export function constraintCascade(stack: BoundaryStack): {
   bayesianToFrequentist: number[];
   frequentistToSolomonoff: number[];
 } {
+  const retrocausal = requireLayer(stack, 0, 'retrocausal');
+  const bayesian = requireLayer(stack, 1, 'bayesian');
+  const frequentist = requireLayer(stack, 2, 'frequentist');
+  const solomonoff = requireLayer(stack, 3, 'solomonoff');
   return {
-    retrocausalToBayesian: upwardConstraint(stack.layers[0], stack.layers[1]),
-    bayesianToFrequentist: upwardConstraint(stack.layers[1], stack.layers[2]),
-    frequentistToSolomonoff: upwardConstraint(stack.layers[2], stack.layers[3]),
+    retrocausalToBayesian: upwardConstraint(retrocausal, bayesian),
+    bayesianToFrequentist: upwardConstraint(bayesian, frequentist),
+    frequentistToSolomonoff: upwardConstraint(frequentist, solomonoff),
   };
 }
 
@@ -165,9 +184,13 @@ export function contextualizationCascade(stack: BoundaryStack): {
   frequentistToBayesian: number[];
   bayesianToRetrocausal: number[];
 } {
+  const retrocausal = requireLayer(stack, 0, 'retrocausal');
+  const bayesian = requireLayer(stack, 1, 'bayesian');
+  const frequentist = requireLayer(stack, 2, 'frequentist');
+  const solomonoff = requireLayer(stack, 3, 'solomonoff');
   return {
-    solomonoffToFrequentist: downwardContext(stack.layers[3], stack.layers[2]),
-    frequentistToBayesian: downwardContext(stack.layers[2], stack.layers[1]),
-    bayesianToRetrocausal: downwardContext(stack.layers[1], stack.layers[0]),
+    solomonoffToFrequentist: downwardContext(solomonoff, frequentist),
+    frequentistToBayesian: downwardContext(frequentist, bayesian),
+    bayesianToRetrocausal: downwardContext(bayesian, retrocausal),
   };
 }

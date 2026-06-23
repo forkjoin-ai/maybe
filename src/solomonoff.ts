@@ -91,7 +91,11 @@ export function solomonoffInit(
   // Under gnode --strategy cannon, dimensions distribute across lanes.
   const limit = Math.min(complexities.length, boundary.counts.length);
   for (let i = 0; i < limit; i++) {
-    const voidAmount = complexities[i] * scale;
+    const complexity = complexities[i];
+    if (complexity === undefined) {
+      throw new Error('solomonoffInit: missing complexity');
+    }
+    const voidAmount = complexity * scale;
     if (voidAmount > 0) {
       updateVoidBoundary(boundary, i, voidAmount);
     }
@@ -127,7 +131,11 @@ export function solomonoffPrior(
   const T = voidInits.reduce((a, b) => a + b, 0);
 
   return complexities.map((c, i) => {
-    const w = T - voidInits[i] + 1;
-    return { complexity: c, voidInit: voidInits[i], weight: w };
+    const voidInit = voidInits[i];
+    if (voidInit === undefined) {
+      throw new Error('solomonoffPrior: missing void init');
+    }
+    const w = T - voidInit + 1;
+    return { complexity: c, voidInit, weight: w };
   });
 }

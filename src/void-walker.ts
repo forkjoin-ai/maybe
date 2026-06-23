@@ -143,10 +143,22 @@ export function c0_execute(state: VoidWalkerState, rng: () => number): number {
         const r = rng() * subSum;
         let cum = 0;
         for (let j = 0; j < eligible.length; j++) {
-          cum += subWeights[j];
-          if (r < cum) return eligible[j];
+          const subWeight = subWeights[j];
+          if (subWeight === undefined) {
+            continue;
+          }
+          cum += subWeight;
+          if (r < cum) {
+            const choice = eligible[j];
+            if (choice !== undefined) {
+              return choice;
+            }
+          }
         }
-        return eligible[eligible.length - 1];
+        const fallback = eligible[eligible.length - 1];
+        if (fallback !== undefined) {
+          return fallback;
+        }
       }
     }
   }
@@ -252,24 +264,37 @@ export function c2_evaluate(state: VoidWalkerState): EvaluationResult {
 
   // Bule gradient over recent window
   const recentBules = history.slice(-window);
-  const buleGradient =
-    (recentBules[recentBules.length - 1] - recentBules[0]) / (window - 1);
+  const firstBule = recentBules[0];
+  const lastBule = recentBules[recentBules.length - 1];
+  if (firstBule === undefined || lastBule === undefined) {
+    return {
+      converging: false,
+      regimeChange: false,
+      buleGradient: 0,
+      entropyGradient: 0,
+      stuck: false,
+      regretRatio: 0,
+    };
+  }
+  const buleGradient = (lastBule - firstBule) / (window - 1);
 
   // Entropy gradient
   const recentEntropy = state.entropyHistory.slice(-window);
+  const firstEntropy = recentEntropy[0];
+  const lastEntropy = recentEntropy[recentEntropy.length - 1];
   const entropyGradient =
-    recentEntropy.length >= 2
-      ? (recentEntropy[recentEntropy.length - 1] - recentEntropy[0]) /
-        (recentEntropy.length - 1)
+    recentEntropy.length >= 2 &&
+    firstEntropy !== undefined &&
+    lastEntropy !== undefined
+      ? (lastEntropy - firstEntropy) / (recentEntropy.length - 1)
       : 0;
 
   // Regime change: Bule spike > 2x recent average
   const avgBule = recentBules.reduce((s, b) => s + b, 0) / recentBules.length;
-  const currentBule = recentBules[recentBules.length - 1];
-  const regimeChange = currentBule > avgBule * 2 && avgBule > 0;
+  const regimeChange = lastBule > avgBule * 2 && avgBule > 0;
 
   // Stuck: Bule unchanged for the whole window
-  const stuck = recentBules.every((b) => Math.abs(b - recentBules[0]) < 0.5);
+  const stuck = recentBules.every((b) => Math.abs(b - firstBule) < 0.5);
 
   // Regret ratio: actual regret / theoretical bound
   const n = state.boundary.counts.length;

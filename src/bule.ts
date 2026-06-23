@@ -394,10 +394,13 @@ export function mergeVoidBoundaries(
 
   for (let i = 0; i < n; i++) {
     // Merge rejection counts: sum both observers' rejections
-    const va = i < a.counts.length ? a.counts[i] : 0;
-    const vb = i < b.counts.length ? b.counts[i] : 0;
-    mergedCounts.push(va + vb);
-    total += va + vb;
+    const left = a.counts[i];
+    const right = b.counts[i];
+    const va = left === undefined ? 0 : left;
+    const vb = right === undefined ? 0 : right;
+    const sum = va + vb;
+    mergedCounts.push(sum);
+    total += sum;
   }
 
   return { counts: mergedCounts, totalEntries: total };
@@ -420,15 +423,28 @@ export function mergeVoidBoundaries(
 export function deficitWeightedFold(distributions: number[][]): number[] {
   const k = distributions.length;
   if (k === 0) return [];
-  if (k === 1) return [...distributions[0]];
+  if (k === 1) {
+    const only = distributions[0];
+    if (only === undefined) {
+      return [];
+    }
+    return [...only];
+  }
 
-  const n = distributions[0].length;
+  const firstDistribution = distributions[0];
+  if (firstDistribution === undefined) {
+    return [];
+  }
+  const n = firstDistribution.length;
 
   // Compute mean distribution
   const mean = new Array(n).fill(0);
   for (const dist of distributions) {
     for (let i = 0; i < n; i++) {
-      mean[i] += dist[i] / k;
+      const value = dist[i];
+      if (value !== undefined) {
+        mean[i] += value / k;
+      }
     }
   }
 
@@ -436,7 +452,8 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
   const divergences: number[] = distributions.map((dist) => {
     let l2 = 0;
     for (let i = 0; i < n; i++) {
-      const diff = dist[i] - mean[i];
+      const value = dist[i];
+      const diff = (value === undefined ? 0 : value) - mean[i];
       l2 += diff * diff;
     }
     return Math.sqrt(l2);
@@ -452,8 +469,19 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
   // Weighted fold
   const result = new Array(n).fill(0);
   for (let j = 0; j < k; j++) {
+    const distribution = distributions[j];
+    if (distribution === undefined) {
+      continue;
+    }
+    const weight = weights[j];
+    if (weight === undefined) {
+      continue;
+    }
     for (let i = 0; i < n; i++) {
-      result[i] += weights[j] * distributions[j][i];
+      const value = distribution[i];
+      if (value !== undefined) {
+        result[i] += weight * value;
+      }
     }
   }
 
