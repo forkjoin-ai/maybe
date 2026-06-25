@@ -1,0 +1,124 @@
+# maybe — easy-deploy site (driven entirely by this file).
+#
+# Deploy with:  a0 xr deploy
+#
+# Content is sourced from open-source/maybe/README.md — keep it honest.
+
+name = "maybe-site"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[site]
+kit = "oss-template"
+title = "maybe — Buleyean probability as executable gnosis topologies"
+
+[site.project]
+name = "Maybe"
+tagline = "Two numbers describe any system under irreversible process."
+description = "Buleyean probability as executable gnosis topologies. Weight comes from what things are NOT: where the void has accumulated least, probability peaks. Three axioms — positivity, normalization, monotonicity — are mechanized in Lean 4 with zero sorry."
+logo = "orb"
+accent = "#a855f7"
+theme = "dark"
+repo = "forkjoin-ai/maybe"
+
+[site.sigil]
+seed = "maybe"
+motion = "drift"
+coherence = "ring"
+frame = "circle"
+
+[site.nav]
+links = ["Features|#features", "Quickstart|#quickstart", "FAQ|#faq", "Source|https://forgo.cloud/forkjoin-ai/maybe"]
+
+[site.hero]
+eyebrow = "Buleyean distribution · the Bule · Lean-mechanized · zero sorry"
+install = "pnpm add @a0n/maybe"
+cta_primary = "Get started"
+cta_primary_href = "#quickstart"
+cta_secondary = "Browse the source"
+cta_secondary_href = "https://forgo.cloud/forkjoin-ai/maybe"
+
+[site.badges]
+items = ["lean:zero-sorry", "axioms:3", "license:MPL-2.0"]
+
+[[site.features]]
+icon = "cpu"
+title = "The core formula"
+body = "P(i) = (T − v_i + 1) / Σ_j(T − v_j + 1). Weight from what things are NOT: where the void has accumulated least, probability peaks. Delegates to @a0n/aeon-logic as single source of truth."
+
+[[site.features]]
+icon = "shield"
+title = "Three provable axioms"
+body = "Positivity (P(i) > 0 — the sliver, +1 from Landauer heat), normalization (sum P = 1 by construction), and monotonicity (less void = more weight). All mechanized in Lean 4 with zero sorry."
+
+[[site.features]]
+icon = "layers"
+title = "Four-layer epistemology"
+body = "Maps probability theory to four timescales via the gnosis BoundaryStack: Retrocausal (lifetime), Bayesian (weeks), Frequentist (minutes), and Solomonoff (generational)."
+
+[[site.features]]
+icon = "zap"
+title = "Thermodynamic accounting"
+body = "The energetic cost of knowing. First Law: V_fork = W_fold + Q_vent. Shannon entropy as the Carnot work bound, the Landauer heat sandwich, and a complete first-law audit over fork/fold/vent energy."
+
+[[site.features]]
+icon = "branch"
+title = "Finite probability compiler"
+body = "Runtime certificates for the native finite probability stack. Continuous probability and measure theory stay out of bounds; bounded callers receive exact finite witnesses with residual shadow accounting."
+
+[[site.features]]
+icon = "gauge"
+title = "The Bule altimeter"
+body = "An integer distance from the ground state of convergence. Statistical teleportation encodes the future in one integer; CRDT merges fold two slivers into one and treat disagreement as information."
+
+[site.quickstart]
+title = "Compute with the void"
+
+[[site.quickstart.tab]]
+label = "Distribution"
+code = "import { } from '@a0n/maybe'\n\n# Buleyean distribution: the compass (what to try next)\n# P(i) = (T − v_i + 1) / Σ_j(T − v_j + 1)\n# Weight from what things are NOT."
+
+[[site.quickstart.tab]]
+label = "The Bule"
+code = "# the altimeter: how far from convergence\nbuleNumber(boundary)      # integer distance from ground state\ninverseBule(boundary)     # learning rate (nats per round)\nsliverWeight(boundary)    # minimum probability from Landauer heat"
+
+[[site.quickstart.tab]]
+label = "VoidWalker"
+code = "# active c0–c3 metacognitive learning agent\nconst state = createVoidWalker(config)\nstepVoidWalker(state, reward, optimal, rng)\n# c0 execute · c1 monitor · c2 evaluate · c3 adapt"
+
+[[site.faq]]
+q = "What are the two numbers?"
+a = "The Buleyean distribution is the compass — what to try next. The Bule number is the altimeter — how far the system is from convergence. Together they describe any system under irreversible process."
+
+[[site.faq]]
+q = "Where does probability weight come from?"
+a = "From what things are NOT. The formula P(i) = (T − v_i + 1) / Σ_j(T − v_j + 1) gives the most weight where the void has accumulated least. Less void means more probability."
+
+[[site.faq]]
+q = "What is the +1 in the formula?"
+a = "The sliver. It is Landauer heat: a vent produces heat, which produces the sliver, which guarantees positivity (P(i) > 0 for all i). The SliverFromVent.lean and SliverOfHope.lean proofs derive it — the sliver (+1) and the proof (−1) are inverses."
+
+[[site.faq]]
+q = "Are the proofs real?"
+a = "Yes. The three axioms — positivity, normalization, monotonicity — are mechanized in Lean 4 with zero sorry, alongside BuleIsValue, RetrocausalBound, SolomonoffBuleyean, FoldHeatHierarchy, LandauerBuley, and FisherManifold."
+
+[[site.faq]]
+q = "What are the .gg topologies?"
+a = "The .gg files in src/topologies/ ARE the specification: complement, void-walk, thermodynamics, bule-altimeter, deficit-weighted-fold, four-layers, curvature-detector, and ethics-grid."
+
+[site.footer]
+quote = "Weight from what things are NOT. Where the void has accumulated least, probability peaks."
+license = "MPL-2.0"
+copyright = "© 2026 forkjoin-ai · maybe contributors"
+
+[[site.footer.column]]
+title = "Project"
+links = ["README|https://forgo.cloud/forkjoin-ai/maybe", "Source|https://forgo.cloud/forkjoin-ai/maybe"]
+
+[[site.footer.column]]
+title = "Modules"
+links = ["buleyean.ts", "layers.ts", "thermodynamics.ts", "bule.ts", "void-walker.ts", "manifold.ts"]
+
+[[site.footer.column]]
+title = "Mechanization"
+links = ["BuleyeanProbability.lean", "LandauerBuley.lean", "FisherManifold.lean", "License"]
