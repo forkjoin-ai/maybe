@@ -8,8 +8,8 @@
 
 // ── Inputs ──────────────────────────────────────────────────────────
 
-(observation:Parameter { value: "null", description: "new data point to process" })
-(void_boundary:Parameter { value: "[]" })
+(observation:Input { value: "null", description: "new data point to process" })
+(void_boundary:Input { value: "[]" })
 
 // ── Observation Processing ──────────────────────────────────────────
 
@@ -19,21 +19,16 @@
 
 // ── Fork: accept or reject ──────────────────────────────────────────
 
-(accepted:Result { kind: "ok" })
-(rejected:Result { kind: "err" })
-
-(classify)-[:FORK]->(accepted | rejected)
-
-// ── Update boundary on rejection ───────────────────────────────────
+// ── Update boundary on observation ─────────────────────────────────
 
 (update:GradientStep { learningRate: "1", parameterKey: "void_boundary", gradientKey: "rejection_dim" })
 
-(rejected)-[:PROCESS]->(update)
+(classify)-[:PROCESS]->(update)
 (update)-[:PROCESS]->(void_boundary)
-(accepted)-[:PROCESS]->(void_boundary)
 
 // ── Recompute Buleyean distribution ────────────────────────────────
 
 (recompute:Logic { op: "buleyean_distribution" })
 (void_boundary)-[:PROCESS]->(recompute)
 (recompute)-[:PROCESS]->(posterior:Result { kind: "ok", description: "frequentist posterior" })
+(posterior)-[:MEASURE { reason: "frequentist-update-audit" }]->(posterior_trace:Trace)

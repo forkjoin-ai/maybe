@@ -25,11 +25,13 @@
 // Fork all tests
 (test_suite)-[:FORK]->(uniform | single | weight_formula | not_softmax | kl_finite | sampling)
 
-(uniform)-[:RACE { expect: "safe" }]->(r1:Result)
-(single)-[:RACE { expect: "safe" }]->(r2:Result)
-(weight_formula)-[:RACE { expect: "safe" }]->(r3:Result)
-(not_softmax)-[:RACE { expect: "safe" }]->(r4:Result)
-(kl_finite)-[:RACE { expect: "safe" }]->(r5:Result)
-(sampling)-[:RACE { expect: "safe" }]->(r6:Result)
+(uniform)-[:PROCESS { expect: "safe" }]->(r1:Result)
+(single)-[:PROCESS { expect: "safe" }]->(r2:Result)
+(weight_formula)-[:PROCESS { expect: "safe" }]->(r3:Result)
+(not_softmax)-[:PROCESS { expect: "safe" }]->(r4:Result)
+(kl_finite)-[:PROCESS { expect: "safe" }]->(r5:Result)
+(sampling)-[:PROCESS { expect: "safe" }]->(r6:Result)
 
 (r1 | r2 | r3 | r4 | r5 | r6)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)
+(verdict)-[:TUNNEL { condition: 'bounded-reject' }]->(complement_test_gg_trace:Trace)
+(verdict)-[:MEASURE { reason: 'topology-audit' }]->(complement_test_gg_trace:Trace)

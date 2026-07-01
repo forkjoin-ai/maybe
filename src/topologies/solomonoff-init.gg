@@ -8,8 +8,8 @@
 
 // ── Inputs ──────────────────────────────────────────────────────────
 
-(hypotheses:Parameter { value: "[]", description: "set of hypotheses to initialize" })
-(void_boundary:Parameter { value: "[]" })
+(hypotheses:Input { value: "[]", description: "set of hypotheses to initialize" })
+(void_boundary:Input { value: "[]" })
 
 // ── Complexity Estimation ───────────────────────────────────────────
 
@@ -17,6 +17,7 @@
 (scale:Logic { op: "scale_complexity", factor: "1.0" })
 
 (hypotheses)-[:PROCESS]->(estimate)
+(hypotheses)-[:PROCESS { role: "void-source" }]->(void_boundary)
 (estimate)-[:PROCESS]->(scale)
 
 // ── Void Initialization ────────────────────────────────────────────

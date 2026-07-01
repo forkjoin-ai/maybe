@@ -28,12 +28,14 @@
 // Fork all tests
 (test_suite)-[:FORK]->(converge | gait | boundary | axioms_always | exploration | entropy | long_run)
 
-(converge)-[:RACE { expect: "safe" }]->(r1:Result)
-(gait)-[:RACE { expect: "safe" }]->(r2:Result)
-(boundary)-[:RACE { expect: "safe" }]->(r3:Result)
-(axioms_always)-[:RACE { expect: "safe" }]->(r4:Result)
-(exploration)-[:RACE { expect: "safe" }]->(r5:Result)
-(entropy)-[:RACE { expect: "safe" }]->(r6:Result)
-(long_run)-[:RACE { expect: "safe" }]->(r7:Result)
+(converge)-[:PROCESS { expect: "safe" }]->(r1:Result)
+(gait)-[:PROCESS { expect: "safe" }]->(r2:Result)
+(boundary)-[:PROCESS { expect: "safe" }]->(r3:Result)
+(axioms_always)-[:PROCESS { expect: "safe" }]->(r4:Result)
+(exploration)-[:PROCESS { expect: "safe" }]->(r5:Result)
+(entropy)-[:PROCESS { expect: "safe" }]->(r6:Result)
+(long_run)-[:PROCESS { expect: "safe" }]->(r7:Result)
 
 (r1 | r2 | r3 | r4 | r5 | r6 | r7)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)
+(verdict)-[:TUNNEL { condition: 'bounded-reject' }]->(void_walk_test_gg_trace:Trace)
+(verdict)-[:MEASURE { reason: 'topology-audit' }]->(void_walk_test_gg_trace:Trace)

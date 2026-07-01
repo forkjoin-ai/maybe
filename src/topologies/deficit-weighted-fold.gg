@@ -4,7 +4,7 @@
 
 # The agent that disagrees most gets the highest weight.
 # This preserves the most information-rich perspective.
-# Semiotic deficit = (k-1) + (V-K) for k agents, V vocab, top-K sparse.
+# Semiotic deficit = k minus 1 plus V minus K for k agents, V vocab, top-K sparse.
 
 node fork_agents {
   type: FORK
@@ -31,12 +31,12 @@ node compute_divergences {
 node weight_by_deficit {
   type: FOLD
   description: "Weight proportional to divergence: disagreement = information"
-  beta1_delta: -(k-1)
+  beta1_delta: "minus k minus 1"
 }
 
 node vent_agreement {
   type: VENT
-  description: "Vent the agreed-upon component (no new information)"
+  description: "Vent the agreed-upon component: no new information"
   beta1_delta: -1
 }
 

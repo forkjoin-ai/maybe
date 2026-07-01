@@ -15,12 +15,13 @@
 
 // ── Inputs ──────────────────────────────────────────────────────────
 
-(trajectory:Parameter { value: "[]", description: "sequence of observed distributions" })
-(reference:Parameter { value: "null", description: "optional trusted reference trajectory" })
+(trajectory:Input { value: "[]", description: "sequence of observed distributions" })
+(reference:Input { value: "null", description: "optional trusted reference trajectory" })
 
 // ── Fisher Manifold Embedding ───────────────────────────────────────
 
 (embed:Logic { op: "fisher_rao_embed", description: "map distributions to points on the Fisher manifold" })
+(reference)-[:PROCESS { role: "reference-source" }]->(trajectory)
 (trajectory)-[:PROCESS]->(embed)
 
 // ── Geodesic Computation ────────────────────────────────────────────
@@ -35,18 +36,19 @@
 (winding:Logic { op: "winding_ratio", description: "path_length / geodesic_distance" })
 (spikes:Logic { op: "curvature_spikes", description: "anomalous curvature maxima" })
 
-(embed)-[:FORK]->(kappa | winding | spikes)
+(geodesic)-[:PROCESS]->(kappa)
+(kappa)-[:PROCESS]->(winding)
+(winding)-[:PROCESS]->(spikes)
 
 // ── Fraud Score ─────────────────────────────────────────────────────
 // Fold curvature signals into a single fraud score
 
 (score:Logic { op: "composite_fraud_score", description: "winding + variance + spike detection" })
-(kappa | winding | spikes)-[:FOLD { strategy: "weighted_sum" }]->(score)
+(spikes)-[:PROCESS { strategy: "weighted_sum" }]->(score)
 
 // ── Comparative Analysis (if reference provided) ────────────────────
 
 (compare:Logic { op: "compare_fraud", description: "relative fraud: suspect vs reference" })
-(reference)-[:PROCESS]->(compare)
 (score)-[:PROCESS]->(compare)
 
 // ── Verdict ─────────────────────────────────────────────────────────
@@ -54,20 +56,26 @@
 (threshold:Logic { op: "fraud_threshold", description: "fraud_score > threshold => suspicious" })
 (compare)-[:PROCESS]->(threshold)
 
-(threshold)-[:FORK]->(clean | suspicious)
+(threshold)-[:PROCESS { condition: "clean" }]->(clean)
+(clean)-[:PROCESS { condition: "suspicious-reviewed" }]->(suspicious)
 (clean:Result { kind: "ok", description: "trajectory follows natural geodesic" })
 (suspicious:Result { kind: "err", description: "anomalous curvature detected -- statistical fraud" })
+(suspicious)-[:PROCESS { reason: "fraud-verdict" }]->(fraud_verdict:Result)
 
 // ── Layer Coordinate Decomposition ──────────────────────────────────
 // Which Buleyean layer is causing the curvature?
 
 (layer_decompose:Logic { op: "manifold_coordinates", description: "decompose curvature by layer" })
-(embed)-[:PROCESS]->(layer_decompose)
+(fraud_verdict)-[:PROCESS]->(layer_decompose)
 
 (b0:Logic { op: "retrocausal_curvature", coordinate: "b0" })
 (b1:Logic { op: "bayesian_curvature", coordinate: "b1" })
 (b2:Logic { op: "frequentist_curvature", coordinate: "b2" })
 (b3:Logic { op: "solomonoff_curvature", coordinate: "b3" })
 
-(layer_decompose)-[:FORK]->(b0 | b1 | b2 | b3)
-(b0 | b1 | b2 | b3)-[:FOLD]->(curvature_source:Result { kind: "ok", description: "which layer bends the manifold" })
+(layer_decompose)-[:PROCESS]->(b0)
+(b0)-[:PROCESS]->(b1)
+(b1)-[:PROCESS]->(b2)
+(b2)-[:PROCESS]->(b3)
+(b3)-[:PROCESS]->(curvature_source:Result { kind: "ok", description: "which layer bends the manifold" })
+(curvature_source)-[:MEASURE { reason: "curvature-audit" }]->(curvature_audit:Trace)

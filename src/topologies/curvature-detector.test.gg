@@ -32,13 +32,15 @@
 // Fork all tests
 (test_suite)-[:FORK]->(geodesic_clean | zigzag_fraud | winding_one | triangle | pos_def | decompose | comparative | scalar)
 
-(geodesic_clean)-[:RACE { expect: "safe" }]->(r1:Result)
-(zigzag_fraud)-[:RACE { expect: "safe" }]->(r2:Result)
-(winding_one)-[:RACE { expect: "safe" }]->(r3:Result)
-(triangle)-[:RACE { expect: "safe" }]->(r4:Result)
-(pos_def)-[:RACE { expect: "safe" }]->(r5:Result)
-(decompose)-[:RACE { expect: "safe" }]->(r6:Result)
-(comparative)-[:RACE { expect: "safe" }]->(r7:Result)
-(scalar)-[:RACE { expect: "safe" }]->(r8:Result)
+(geodesic_clean)-[:PROCESS { expect: "safe" }]->(r1:Result)
+(zigzag_fraud)-[:PROCESS { expect: "safe" }]->(r2:Result)
+(winding_one)-[:PROCESS { expect: "safe" }]->(r3:Result)
+(triangle)-[:PROCESS { expect: "safe" }]->(r4:Result)
+(pos_def)-[:PROCESS { expect: "safe" }]->(r5:Result)
+(decompose)-[:PROCESS { expect: "safe" }]->(r6:Result)
+(comparative)-[:PROCESS { expect: "safe" }]->(r7:Result)
+(scalar)-[:PROCESS { expect: "safe" }]->(r8:Result)
 
 (r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)
+(verdict)-[:TUNNEL { condition: 'bounded-reject' }]->(curvature_detector_test_gg_trace:Trace)
+(verdict)-[:MEASURE { reason: 'topology-audit' }]->(curvature_detector_test_gg_trace:Trace)

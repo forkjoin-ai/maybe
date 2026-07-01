@@ -10,7 +10,7 @@
 
 // ── Theorem Nodes ───────────────────────────────────────────────────
 
-(grid:Parameter { value: "ethics-grid", description: "eight compiler checks" })
+(grid:Input { value: "ethics-grid", description: "eight compiler checks" })
 
 // Axiom 1: Positivity -- P(i) > 0 for all i
 (positivity:Logic { op: "assert_positivity", theorem: "buleyean_positive" })
@@ -42,15 +42,17 @@
 
 // ── Race to completion ──────────────────────────────────────────────
 
-(positivity)-[:RACE { expect: "safe" }]->(r1:Result)
-(normalization)-[:RACE { expect: "safe" }]->(r2:Result)
-(monotonicity)-[:RACE { expect: "safe" }]->(r3:Result)
-(retrocausal)-[:RACE { expect: "safe" }]->(r4:Result)
-(solomonoff)-[:RACE { expect: "safe" }]->(r5:Result)
-(layer_coherence)-[:RACE { expect: "safe" }]->(r6:Result)
-(convergence)-[:RACE { expect: "safe" }]->(r7:Result)
-(idempotence)-[:RACE { expect: "safe" }]->(r8:Result)
+(positivity)-[:PROCESS { expect: "safe" }]->(r1:Result)
+(normalization)-[:PROCESS { expect: "safe" }]->(r2:Result)
+(monotonicity)-[:PROCESS { expect: "safe" }]->(r3:Result)
+(retrocausal)-[:PROCESS { expect: "safe" }]->(r4:Result)
+(solomonoff)-[:PROCESS { expect: "safe" }]->(r5:Result)
+(layer_coherence)-[:PROCESS { expect: "safe" }]->(r6:Result)
+(convergence)-[:PROCESS { expect: "safe" }]->(r7:Result)
+(idempotence)-[:PROCESS { expect: "safe" }]->(r8:Result)
 
 // ── Fold to verdict ────────────────────────────────────────────────
 
 (r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict { description: "all eight ethical axioms hold" })
+(verdict)-[:TUNNEL { condition: "axiom-failure" }]->(verdict_trace:Trace)
+(verdict)-[:MEASURE { reason: "ethics-grid-audit" }]->(verdict_trace:Trace)

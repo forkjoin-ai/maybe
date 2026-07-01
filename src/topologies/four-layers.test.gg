@@ -31,13 +31,15 @@
 // Fork all tests
 (test_suite)-[:FORK]->(timescales | upward | downward | resonance | pos_after_tick | retro_constrains | complexity | measurement)
 
-(timescales)-[:RACE { expect: "safe" }]->(r1:Result)
-(upward)-[:RACE { expect: "safe" }]->(r2:Result)
-(downward)-[:RACE { expect: "safe" }]->(r3:Result)
-(resonance)-[:RACE { expect: "safe" }]->(r4:Result)
-(pos_after_tick)-[:RACE { expect: "safe" }]->(r5:Result)
-(retro_constrains)-[:RACE { expect: "safe" }]->(r6:Result)
-(complexity)-[:RACE { expect: "safe" }]->(r7:Result)
-(measurement)-[:RACE { expect: "safe" }]->(r8:Result)
+(timescales)-[:PROCESS { expect: "safe" }]->(r1:Result)
+(upward)-[:PROCESS { expect: "safe" }]->(r2:Result)
+(downward)-[:PROCESS { expect: "safe" }]->(r3:Result)
+(resonance)-[:PROCESS { expect: "safe" }]->(r4:Result)
+(pos_after_tick)-[:PROCESS { expect: "safe" }]->(r5:Result)
+(retro_constrains)-[:PROCESS { expect: "safe" }]->(r6:Result)
+(complexity)-[:PROCESS { expect: "safe" }]->(r7:Result)
+(measurement)-[:PROCESS { expect: "safe" }]->(r8:Result)
 
 (r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8)-[:FOLD { strategy: "all-pass" }]->(verdict:Verdict)
+(verdict)-[:TUNNEL { condition: 'bounded-reject' }]->(four_layers_test_gg_trace:Trace)
+(verdict)-[:MEASURE { reason: 'topology-audit' }]->(four_layers_test_gg_trace:Trace)

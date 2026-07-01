@@ -3,17 +3,17 @@
 @version "1.0.0"
 
 # Two numbers describe any system under irreversible process:
-#   Buleyean distribution = compass (what to try next)
-#   Bule number = altimeter (how far from convergence)
+#   Buleyean distribution = compass: what to try next
+#   Bule number = altimeter: how far from convergence
 
 node compute_bule {
   type: FOLD
-  description: "B = max(v) - min(v): integer distance from ground state"
+  description: "B = max_v - min_v: integer distance from ground state"
 }
 
 node compute_distribution {
   type: FOLD
-  description: "P(i) = (T - v_i + 1) / sum: the compass"
+  description: "P_i = T - v_i + 1 over sum: the compass"
 }
 
 node beta1_state {
@@ -50,11 +50,11 @@ edge heat_is_sliver -> positivity_follows { type: FOLD }
 # Statistical teleportation
 node teleport {
   type: FOLD
-  description: "deficit(T+k) = max(0, B-k): one integer encodes the future"
+  description: "deficit at T plus k = max of zero and B minus k: one integer encodes the future"
 }
 
-# Void boundary merging (CRDT)
+# Void boundary merging: CRDT
 node merge_boundaries {
   type: FOLD
-  description: "w_merge(i) = w_A(i) + w_B(i) - 1: two slivers become one"
+  description: "w_merge_i = w_A_i + w_B_i - 1: two slivers become one"
 }

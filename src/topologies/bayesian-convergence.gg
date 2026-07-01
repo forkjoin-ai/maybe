@@ -10,8 +10,8 @@
 
 // ── State ───────────────────────────────────────────────────────────
 
-(prior_boundary:Parameter { value: "[]", description: "prior void boundary state" })
-(evidence:Parameter { value: "null", description: "new evidence to incorporate" })
+(prior_boundary:Input { value: "[]", description: "prior void boundary state" })
+(evidence:Input { value: "null", description: "new evidence to incorporate" })
 
 // ── Prior Distribution ──────────────────────────────────────────────
 
@@ -21,30 +21,25 @@
 // ── Evidence Processing ─────────────────────────────────────────────
 
 (likelihood:Logic { op: "rejection_predicate" })
-(evidence)-[:PROCESS]->(likelihood)
+(evidence)-[:PROCESS { role: "prior-evidence" }]->(prior_boundary)
+(prior_dist)-[:PROCESS]->(likelihood)
 
 // ── Fork: evidence accepted or rejected ─────────────────────────────
-
-(evidence_accept:Result { kind: "ok" })
-(evidence_reject:Result { kind: "err" })
-
-(likelihood)-[:FORK]->(evidence_accept | evidence_reject)
 
 // ── Posterior Update ────────────────────────────────────────────────
 
 (update_prior:GradientStep { learningRate: "1", parameterKey: "prior_boundary", gradientKey: "evidence" })
 
-(evidence_reject)-[:PROCESS]->(update_prior)
-(update_prior)-[:PROCESS]->(prior_boundary)
-(evidence_accept)-[:PROCESS]->(prior_boundary)
+(likelihood)-[:PROCESS]->(update_prior)
 
 // ── Posterior Distribution ──────────────────────────────────────────
 
 (posterior_dist:Logic { op: "buleyean_distribution", source: "prior_boundary" })
-(prior_boundary)-[:PROCESS]->(posterior_dist)
+(update_prior)-[:PROCESS]->(posterior_dist)
 
 // ── Convergence Check ───────────────────────────────────────────────
 
 (convergence:Logic { op: "inverse_bule", description: "entropy reduction rate -- approaches 0 at convergence" })
 (posterior_dist)-[:PROCESS]->(convergence)
 (convergence)-[:PROCESS]->(converged:Result { kind: "ok", description: "Bayesian convergence state" })
+(converged)-[:MEASURE { reason: "bayesian-convergence-audit" }]->(convergence_trace:Trace)

@@ -8,15 +8,15 @@
 
 // ── Inputs ──────────────────────────────────────────────────────────
 
-(void_boundary:Parameter { value: "[]", description: "per-dimension rejection counts" })
-(total_entries:Parameter { value: "0", description: "T = total entries in void" })
+(void_boundary:Input { value: "[]", description: "per-dimension rejection counts" })
+(total_entries:Input { value: "0", description: "T = total entries in void" })
 
 // ── Core Formula ────────────────────────────────────────────────────
 
 (weights:Logic { op: "buleyean_weights", formula: "T - v_i + 1" })
 (normalize:Logic { op: "normalize_sum", description: "divide by sum to get probabilities" })
 
-(void_boundary)-[:PROCESS]->(weights)
+(void_boundary)-[:PROCESS { role: "entry-count-source" }]->(total_entries)
 (total_entries)-[:PROCESS]->(weights)
 (weights)-[:PROCESS]->(normalize)
 
@@ -31,5 +31,8 @@
 (check_sum:Logic { op: "assert_sum_one", invariant: "normalization" })
 (check_mono:Logic { op: "assert_monotone", invariant: "monotonicity" })
 
-(distribution)-[:FORK]->(check_positive | check_sum | check_mono)
-(check_positive | check_sum | check_mono)-[:FOLD { strategy: "all-pass" }]->(axioms_hold:Result)
+(distribution)-[:PROCESS]->(check_positive)
+(check_positive)-[:PROCESS]->(check_sum)
+(check_sum)-[:PROCESS]->(check_mono)
+(check_mono)-[:PROCESS]->(axioms_hold:Result)
+(axioms_hold)-[:MEASURE { reason: "complement-axiom-audit" }]->(axiom_trace:Trace)

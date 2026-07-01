@@ -10,7 +10,7 @@
 
 // ── State ───────────────────────────────────────────────────────────
 
-(void_boundary:Parameter { value: "[]" })
+(void_boundary:Input { value: "[]" })
 (buleyean_dist:Logic { op: "buleyean_distribution", formula: "(T - v_i + 1) / sum" })
 
 (void_boundary)-[:PROCESS]->(buleyean_dist)
@@ -23,7 +23,7 @@
 
 (buleyean_dist)-[:PROCESS]->(choose)
 (choose)-[:PROCESS]->(execute)
-(execute)-[:FORK]->(observe | accept)
+(execute)-[:PROCESS]->(observe)
 
 // ── c0: Update void ────────────────────────────────────────────────
 
@@ -31,10 +31,9 @@
 (reject:Result { kind: "err" })
 (void_update:GradientStep { learningRate: "1", parameterKey: "void_boundary", gradientKey: "rejection" })
 
-(observe)-[:FORK]->(accept | reject)
-(accept)-[:PROCESS]->(sink:Sink)
+(observe)-[:PROCESS]->(accept)
+(accept)-[:PROCESS]->(reject)
 (reject)-[:PROCESS]->(void_update)
-(void_update)-[:PROCESS]->(void_boundary)
 
 // ── c1: Measure ─────────────────────────────────────────────────────
 
@@ -42,13 +41,15 @@
 (kurtosis:Logic { op: "excess_kurtosis" })
 (inverse_bule:Logic { op: "inverse_bule" })
 
-(buleyean_dist)-[:FORK]->(entropy | kurtosis | inverse_bule)
+(void_update)-[:PROCESS]->(entropy)
+(entropy)-[:PROCESS]->(kurtosis)
+(kurtosis)-[:PROCESS]->(inverse_bule)
 
 // ── c2: Select gait ────────────────────────────────────────────────
 
 (gait_select:Logic { op: "select_gait" })
 
-(kurtosis | entropy | inverse_bule)-[:FOLD]->(gait_select)
+(inverse_bule)-[:PROCESS]->(gait_select)
 
 // ── c3: Adapt ──────────────────────────────────────────────────────
 
@@ -58,4 +59,4 @@
 
 // ── Feedback loop ──────────────────────────────────────────────────
 
-(adapt)-[:PROCESS]->(void_boundary)
+(adapt)-[:MEASURE { reason: "void-walk-audit" }]->(walk_trace:Trace)

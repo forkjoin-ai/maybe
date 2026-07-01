@@ -7,7 +7,7 @@
 
 node fork_energy {
   type: FORK
-  description: "Create N parallel paths -- potential energy V = kT ln2 * log2(N)"
+  description: "Create N parallel paths -- potential energy V = kT ln2 times log2_N"
   beta1_delta: +N
 }
 
@@ -44,6 +44,6 @@ node landauer_floor {
 # Carnot ceiling: fold cannot extract more work than Shannon entropy
 node carnot_bound {
   type: FOLD
-  description: "Maximum work: H(input) bits"
-  invariant: "work <= shannon_entropy(input)"
+  description: "Maximum work: H_input bits"
+  invariant: "work <= shannon_entropy_input"
 }
