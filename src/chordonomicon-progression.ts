@@ -163,6 +163,9 @@ function classifyQuality(suffix: string): ChordQuality {
   return 'unknown';
 }
 
+/**
+ * Parses the Chord Symbol.
+ */
 export function parseChordSymbol(token: string): ParsedChordSymbol | null {
   const head = token.trim().split('/')[0]?.replace(/^[[(]+|[\])]+$/g, '') ?? '';
   if (head.length === 0 || head === 'N' || head.toLowerCase() === 'nan') return null;
@@ -181,6 +184,9 @@ export function parseChordSymbol(token: string): ParsedChordSymbol | null {
   };
 }
 
+/**
+ * Parses the Chordonomicon Chord Stream.
+ */
 export function parseChordonomiconChordStream(source: string): string[] {
   return source
     .replace(/[|,;]+/g, ' ')
@@ -189,6 +195,9 @@ export function parseChordonomiconChordStream(source: string): string[] {
     .filter((token) => token.length > 0 && parseChordSymbol(token) !== null);
 }
 
+/**
+ * Handles the maybe normalize Chordonomicon Section Label workflow.
+ */
 export function normalizeChordonomiconSectionLabel(label: string): SongSectionName | null {
   const normalized = label
     .trim()
@@ -199,6 +208,9 @@ export function normalizeChordonomiconSectionLabel(label: string): SongSectionNa
   return SECTION_TAG_MAP[normalized] ?? null;
 }
 
+/**
+ * Parses the Chordonomicon Sections.
+ */
 export function parseChordonomiconSections(source: string): ChordonomiconSection[] {
   const sections: ChordonomiconSection[] = [];
   let activeLabel: string | null = null;
@@ -231,6 +243,9 @@ export function parseChordonomiconSections(source: string): ChordonomiconSection
   return sections.filter((section) => section.tokens.length > 0);
 }
 
+/**
+ * Handles the maybe project Chord To Roman workflow.
+ */
 export function projectChordToRoman(chord: ParsedChordSymbol, tonicPc: number): RomanChord | null {
   const degree = pitchClass(chord.rootPc - tonicPc);
   for (const roman of ROMAN_CHORDS) {
@@ -239,6 +254,9 @@ export function projectChordToRoman(chord: ParsedChordSymbol, tonicPc: number): 
   return null;
 }
 
+/**
+ * Returns whether is Diatonic Quality Compatible is true.
+ */
 export function isDiatonicQualityCompatible(roman: RomanChord, quality: ChordQuality): boolean {
   if (quality === 'unknown') return true;
   if (roman === 'ii' || roman === 'iii' || roman === 'vi') {
@@ -250,6 +268,9 @@ export function isDiatonicQualityCompatible(roman: RomanChord, quality: ChordQua
   return quality === 'major' || quality === 'dominant' || quality === 'augmented';
 }
 
+/**
+ * Handles the maybe infer Major Tonic workflow.
+ */
 export function inferMajorTonic(chords: readonly ParsedChordSymbol[]): KeyInference {
   let best: KeyInference = { tonicPc: 0, score: -1, projectedCount: 0 };
   for (let tonicPc = 0; tonicPc < 12; tonicPc++) {
@@ -266,6 +287,9 @@ export function inferMajorTonic(chords: readonly ParsedChordSymbol[]): KeyInfere
   return best;
 }
 
+/**
+ * Handles the maybe project Chord Stream To Roman workflow.
+ */
 export function projectChordStreamToRoman(tokens: readonly string[], tonicPc?: number): RomanChord[] {
   const parsed = tokens.flatMap((token) => {
     const chord = parseChordSymbol(token);
@@ -278,10 +302,16 @@ export function projectChordStreamToRoman(tokens: readonly string[], tonicPc?: n
   });
 }
 
+/**
+ * Handles the maybe project Section To Roman workflow.
+ */
 export function projectSectionToRoman(section: ChordonomiconSection, tonicPc: number): RomanChord[] {
   return projectChordStreamToRoman(section.tokens, tonicPc);
 }
 
+/**
+ * Handles the maybe compress Adjacent Roman Chords workflow.
+ */
 export function compressAdjacentRomanChords(chords: readonly RomanChord[]): RomanChord[] {
   const out: RomanChord[] = [];
   for (const chord of chords) {
@@ -290,6 +320,9 @@ export function compressAdjacentRomanChords(chords: readonly RomanChord[]): Roma
   return out;
 }
 
+/**
+ * Handles the maybe shortest Exact Roman Cycle workflow.
+ */
 export function shortestExactRomanCycle(chords: readonly RomanChord[]): RomanChord[] {
   if (chords.length <= 1) return [...chords];
   for (let period = 1; period <= chords.length; period++) {
@@ -305,6 +338,9 @@ export function shortestExactRomanCycle(chords: readonly RomanChord[]): RomanCho
   return [...chords];
 }
 
+/**
+ * Handles the maybe section Chord Windows workflow.
+ */
 export function sectionChordWindows(chords: readonly RomanChord[], chordCount: number): RomanChord[][] {
   const count = Math.max(1, Math.floor(chordCount));
   const windows: RomanChord[][] = [];
@@ -329,6 +365,9 @@ function inferTonicForSections(sections: readonly ChordonomiconSection[]): numbe
   return inferMajorTonic(parsed).tonicPc;
 }
 
+/**
+ * Handles the maybe estimate Popular Section Chord Sets workflow.
+ */
 export function estimatePopularSectionChordSets(
   songs: readonly string[],
   chordCount: number = 4,
@@ -382,6 +421,9 @@ export function estimatePopularSectionChordSets(
   );
 }
 
+/**
+ * Handles the maybe estimate Popular Section Chord Cycles workflow.
+ */
 export function estimatePopularSectionChordCycles(
   songs: readonly string[],
   topPerSection: number = 8
@@ -429,6 +471,9 @@ export function estimatePopularSectionChordCycles(
   );
 }
 
+/**
+ * Handles the maybe count Roman Transitions workflow.
+ */
 export function countRomanTransitions(progressions: readonly (readonly RomanChord[])[]): ChordTransitionCounts {
   const counts = emptyTransitionCounts();
   for (const progression of progressions) {
@@ -465,6 +510,9 @@ function normalizeRow(counts: readonly number[], rowMass: number, floorMass: num
   return row;
 }
 
+/**
+ * Handles the maybe normalize Transition Counts workflow.
+ */
 export function normalizeTransitionCounts(
   counts: ChordTransitionCounts,
   rowMass: number = CHORDONOMICON_BASELINE_ROW_MASS,
@@ -482,6 +530,9 @@ export function normalizeTransitionCounts(
   return matrix;
 }
 
+/**
+ * Handles the maybe estimate Transition Matrix From Chord Streams workflow.
+ */
 export function estimateTransitionMatrixFromChordStreams(
   chordStreams: readonly (readonly string[])[],
   rowMass: number = CHORDONOMICON_BASELINE_ROW_MASS
@@ -490,6 +541,9 @@ export function estimateTransitionMatrixFromChordStreams(
   return normalizeTransitionCounts(countRomanTransitions(progressions), rowMass);
 }
 
+/**
+ * Handles the maybe assert Chord Rows Stochastic workflow.
+ */
 export function assertChordRowsStochastic(
   matrix: ChordTransitionMatrix = BASELINE_CHORDONOMICON_TRANSITION_WEIGHTS,
   rowMass: number = CHORDONOMICON_BASELINE_ROW_MASS
@@ -503,6 +557,9 @@ export function assertChordRowsStochastic(
   return true;
 }
 
+/**
+ * Handles the maybe transition Edges workflow.
+ */
 export function transitionEdges(
   matrix: ChordTransitionMatrix = BASELINE_CHORDONOMICON_TRANSITION_WEIGHTS
 ): ChordTransitionEdge[] {
@@ -523,6 +580,9 @@ export function transitionEdges(
   );
 }
 
+/**
+ * Handles the maybe compile Chord Transition Kernel workflow.
+ */
 export function compileChordTransitionKernel(
   matrix: ChordTransitionMatrix = BASELINE_CHORDONOMICON_TRANSITION_WEIGHTS,
   rowMass: number = CHORDONOMICON_BASELINE_ROW_MASS
@@ -537,6 +597,9 @@ export function compileChordTransitionKernel(
   };
 }
 
+/**
+ * Handles the maybe functional Flow Bonus workflow.
+ */
 export function functionalFlowBonus(from: RomanChord, to: RomanChord): number {
   const a = FUNCTION_CLASS[from];
   const b = FUNCTION_CLASS[to];
@@ -547,6 +610,9 @@ export function functionalFlowBonus(from: RomanChord, to: RomanChord): number {
   return 0;
 }
 
+/**
+ * Handles the maybe high Entropy Transition workflow.
+ */
 export function highEntropyTransition(
   from: RomanChord,
   to: RomanChord,
@@ -558,6 +624,9 @@ export function highEntropyTransition(
   return weight <= 10;
 }
 
+/**
+ * Handles the maybe choose Next Chord workflow.
+ */
 export function chooseNextChord(
   current: RomanChord,
   unitInterval: number,
@@ -578,6 +647,9 @@ export function chooseNextChord(
   return finalChord;
 }
 
+/**
+ * Handles the maybe deterministic Transition Unit workflow.
+ */
 export function deterministicTransitionUnit(seed: number): number {
   let x = seed >>> 0;
   x ^= x << 13;
@@ -586,6 +658,9 @@ export function deterministicTransitionUnit(seed: number): number {
   return (x >>> 0) / 4294967296;
 }
 
+/**
+ * Handles the maybe choose Deterministic Next Chord workflow.
+ */
 export function chooseDeterministicNextChord(
   current: RomanChord,
   seed: number,

@@ -191,12 +191,18 @@ export function buildHypothesisSpace(input: {
   };
 }
 
+/**
+ * Handles the maybe normalize Key workflow.
+ */
 export function normalizeKey(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 // ───────────────────────── channels ─────────────────────────
 
+/**
+ * Handles the maybe feature Channel workflow.
+ */
 export function featureChannel(
   space: HypothesisSpace,
   feature: string,
@@ -235,6 +241,9 @@ export function featureChannel(
   };
 }
 
+/**
+ * Handles the maybe prior Channel workflow.
+ */
 export function priorChannel(space: HypothesisSpace): FeatureChannelVerdict {
   const n = space.size;
   const rejection = new Float64Array(n);
@@ -250,6 +259,9 @@ export function priorChannel(space: HypothesisSpace): FeatureChannelVerdict {
   };
 }
 
+/**
+ * Builds the Channels.
+ */
 export function buildChannels(
   space: HypothesisSpace,
   present: readonly string[],
@@ -277,6 +289,9 @@ export interface FuseResult {
   readonly walled: boolean[];
 }
 
+/**
+ * Handles the maybe flatten Channels workflow.
+ */
 export function flattenChannels(
   verdicts: readonly FeatureChannelVerdict[],
   n: number,
@@ -298,6 +313,9 @@ export function flattenChannels(
   return { active, rejectionFlat, weights, hardwallFlat };
 }
 
+/**
+ * Handles the maybe fuse workflow.
+ */
 export function fuse(
   space: HypothesisSpace,
   verdicts: readonly FeatureChannelVerdict[],
@@ -352,6 +370,9 @@ function fuseTs(
 
 // ───────────────────────── next probe (the Sherlock question) ─────────────────────────
 
+/**
+ * Handles the maybe next Probes workflow.
+ */
 export function nextProbes(
   space: HypothesisSpace,
   survivors: readonly Survivor[],
@@ -410,6 +431,9 @@ const COVER_P = 0.5;
 const MARGINAL_MIN = 0.15;
 const MAX_FACTORS = 4;
 
+/**
+ * Handles the maybe factorize workflow.
+ */
 export function factorize(
   space: HypothesisSpace,
   survivors: readonly Survivor[],
@@ -500,6 +524,9 @@ export class Abduction {
   }
 }
 
+/**
+ * Builds the Abduction.
+ */
 export function buildAbduction(
   input: Parameters<typeof buildHypothesisSpace>[0],
   opts?: AbduceOptions,
@@ -536,6 +563,9 @@ function buildSurvivorsEliminated(
   return { survivors, eliminated };
 }
 
+/**
+ * Handles the maybe void Metrics workflow.
+ */
 export function voidMetrics(survivors: Survivor[], totalHypotheses: number): AbductivePosterior['void'] {
   let entropy = 0;
   for (const s of survivors) if (s.probability > 0) entropy -= s.probability * Math.log(s.probability);
@@ -587,6 +617,9 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/**
+ * Handles the maybe map Void workflow.
+ */
 export function mapVoid(
   space: HypothesisSpace,
   present: readonly string[],
@@ -688,9 +721,15 @@ let wasmKernel: AbductionWasm | null = null;
 export function setAbductionWasm(kernel: AbductionWasm | null): void {
   wasmKernel = kernel;
 }
+/**
+ * Handles the maybe get Abduction Wasm workflow.
+ */
 export function getAbductionWasm(): AbductionWasm | null {
   return wasmKernel;
 }
+/**
+ * Returns whether is Abduction Wasm Ready is true.
+ */
 export function isAbductionWasmReady(): boolean {
   return wasmKernel !== null;
 }
