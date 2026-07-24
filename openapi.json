@@ -1,0 +1,2154 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Maybe API",
+    "version": "0.1.0",
+    "description": "GraphQL-projected REST inventory from `src/topologies/bayesian-convergence.gg` via @a0n/x-gql. Topology is the authority."
+  },
+  "paths": {
+    "/api/priorDist": {
+      "get": {
+        "summary": "Query: prior_boundary → prior_dist",
+        "operationId": "priorDist",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/priorBoundary": {
+      "get": {
+        "summary": "Query: evidence → prior_boundary",
+        "operationId": "priorBoundary",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/likelihood": {
+      "get": {
+        "summary": "Query: prior_dist → likelihood",
+        "operationId": "likelihood",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/updatePrior": {
+      "get": {
+        "summary": "Query: likelihood → update_prior",
+        "operationId": "updatePrior",
+        "responses": {
+          "200": {
+            "description": "Returns GradientStep",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradientStep"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/posteriorDist": {
+      "get": {
+        "summary": "Query: update_prior → posterior_dist",
+        "operationId": "posteriorDist",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/convergence": {
+      "get": {
+        "summary": "Query: posterior_dist → convergence",
+        "operationId": "convergence",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/converged": {
+      "get": {
+        "summary": "Query: convergence → converged",
+        "operationId": "converged",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/bayesian-convergence.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/totalEntries": {
+      "get": {
+        "summary": "Query: void_boundary → total_entries",
+        "operationId": "totalEntries",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/weights": {
+      "get": {
+        "summary": "Query: total_entries → weights",
+        "operationId": "weights",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/normalize": {
+      "get": {
+        "summary": "Query: weights → normalize",
+        "operationId": "normalize",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/distribution": {
+      "get": {
+        "summary": "Query: normalize → distribution",
+        "operationId": "distribution",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/checkPositive": {
+      "get": {
+        "summary": "Query: distribution → check_positive",
+        "operationId": "checkPositive",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/checkSum": {
+      "get": {
+        "summary": "Query: check_positive → check_sum",
+        "operationId": "checkSum",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/checkMono": {
+      "get": {
+        "summary": "Query: check_sum → check_mono",
+        "operationId": "checkMono",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/axiomsHold": {
+      "get": {
+        "summary": "Query: check_mono → axioms_hold",
+        "operationId": "axiomsHold",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/complement.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/trajectory": {
+      "get": {
+        "summary": "Query: reference → trajectory",
+        "operationId": "trajectory",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/embed": {
+      "get": {
+        "summary": "Query: trajectory → embed",
+        "operationId": "embed",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/geodesic": {
+      "get": {
+        "summary": "Query: embed → geodesic",
+        "operationId": "geodesic",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/kappa": {
+      "get": {
+        "summary": "Query: geodesic → kappa",
+        "operationId": "kappa",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/winding": {
+      "get": {
+        "summary": "Query: kappa → winding",
+        "operationId": "winding",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/spikes": {
+      "get": {
+        "summary": "Query: winding → spikes",
+        "operationId": "spikes",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/score": {
+      "get": {
+        "summary": "Query: spikes → score",
+        "operationId": "score",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/compare": {
+      "get": {
+        "summary": "Query: score → compare",
+        "operationId": "compare",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/threshold": {
+      "get": {
+        "summary": "Query: compare → threshold",
+        "operationId": "threshold",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/clean": {
+      "get": {
+        "summary": "Query: threshold → clean",
+        "operationId": "clean",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/suspicious": {
+      "get": {
+        "summary": "Query: clean → suspicious",
+        "operationId": "suspicious",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/fraudVerdict": {
+      "get": {
+        "summary": "Query: suspicious → fraud_verdict",
+        "operationId": "fraudVerdict",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/layerDecompose": {
+      "get": {
+        "summary": "Query: fraud_verdict → layer_decompose",
+        "operationId": "layerDecompose",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/b0": {
+      "get": {
+        "summary": "Query: layer_decompose → b0",
+        "operationId": "b0",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/b1": {
+      "get": {
+        "summary": "Query: b0 → b1",
+        "operationId": "b1",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/b2": {
+      "get": {
+        "summary": "Query: b1 → b2",
+        "operationId": "b2",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/b3": {
+      "get": {
+        "summary": "Query: b2 → b3",
+        "operationId": "b3",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/curvatureSource": {
+      "get": {
+        "summary": "Query: b3 → curvature_source",
+        "operationId": "curvatureSource",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/curvature-detector.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r1": {
+      "get": {
+        "summary": "Query: positivity → r1",
+        "operationId": "r1",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r2": {
+      "get": {
+        "summary": "Query: normalization → r2",
+        "operationId": "r2",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r3": {
+      "get": {
+        "summary": "Query: monotonicity → r3",
+        "operationId": "r3",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r4": {
+      "get": {
+        "summary": "Query: retrocausal → r4",
+        "operationId": "r4",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r5": {
+      "get": {
+        "summary": "Query: solomonoff → r5",
+        "operationId": "r5",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r6": {
+      "get": {
+        "summary": "Query: layer_coherence → r6",
+        "operationId": "r6",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r7": {
+      "get": {
+        "summary": "Query: convergence → r7",
+        "operationId": "r7",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/r8": {
+      "get": {
+        "summary": "Query: idempotence → r8",
+        "operationId": "r8",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/verdict": {
+      "post": {
+        "summary": "Mutation fold: r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 → verdict",
+        "operationId": "verdict",
+        "responses": {
+          "200": {
+            "description": "Returns Verdict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verdict"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/ethics-grid.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/initComplexity": {
+      "get": {
+        "summary": "Query: init_terminal → init_complexity",
+        "operationId": "initComplexity",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/retrocausal": {
+      "get": {
+        "summary": "Query: init_complexity → retrocausal",
+        "operationId": "retrocausal",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/up01": {
+      "get": {
+        "summary": "Query: retrocausal → up_01",
+        "operationId": "up01",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/bayesian": {
+      "get": {
+        "summary": "Query: up_01 → bayesian",
+        "operationId": "bayesian",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/up12": {
+      "get": {
+        "summary": "Query: bayesian → up_12",
+        "operationId": "up12",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/frequentist": {
+      "get": {
+        "summary": "Query: up_12 → frequentist",
+        "operationId": "frequentist",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/up23": {
+      "get": {
+        "summary": "Query: frequentist → up_23",
+        "operationId": "up23",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/solomonoff": {
+      "get": {
+        "summary": "Query: up_23 → solomonoff",
+        "operationId": "solomonoff",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/down32": {
+      "get": {
+        "summary": "Query: solomonoff → down_32",
+        "operationId": "down32",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/down21": {
+      "get": {
+        "summary": "Query: down_32 → down_21",
+        "operationId": "down21",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/down10": {
+      "get": {
+        "summary": "Query: down_21 → down_10",
+        "operationId": "down10",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/resonance03": {
+      "get": {
+        "summary": "Query: down_10 → resonance_03",
+        "operationId": "resonance03",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/resonance30": {
+      "get": {
+        "summary": "Query: resonance_03 → resonance_30",
+        "operationId": "resonance30",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/measureStack": {
+      "get": {
+        "summary": "Query: resonance_30 → measure_stack",
+        "operationId": "measureStack",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/state": {
+      "get": {
+        "summary": "Query: measure_stack → state",
+        "operationId": "state",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/four-layers.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/classify": {
+      "get": {
+        "summary": "Query: observation → classify",
+        "operationId": "classify",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/frequentist-update.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/update": {
+      "get": {
+        "summary": "Query: classify → update",
+        "operationId": "update",
+        "responses": {
+          "200": {
+            "description": "Returns GradientStep",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradientStep"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/frequentist-update.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/voidBoundary": {
+      "get": {
+        "summary": "Query: update → void_boundary",
+        "operationId": "voidBoundary",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/frequentist-update.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/recompute": {
+      "get": {
+        "summary": "Query: void_boundary → recompute",
+        "operationId": "recompute",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/frequentist-update.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/posterior": {
+      "get": {
+        "summary": "Query: recompute → posterior",
+        "operationId": "posterior",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/frequentist-update.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/adjacency": {
+      "get": {
+        "summary": "Query: terminal_states → adjacency",
+        "operationId": "adjacency",
+        "responses": {
+          "200": {
+            "description": "Returns Input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Input"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/encode": {
+      "get": {
+        "summary": "Query: adjacency → encode",
+        "operationId": "encode",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/propagate": {
+      "get": {
+        "summary": "Query: void_boundary → propagate",
+        "operationId": "propagate",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/verify": {
+      "get": {
+        "summary": "Query: propagate → verify",
+        "operationId": "verify",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/boundHolds": {
+      "get": {
+        "summary": "Query: verify → bound_holds",
+        "operationId": "boundHolds",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/boundViolated": {
+      "get": {
+        "summary": "Query: bound_holds → bound_violated",
+        "operationId": "boundViolated",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/buleyeanDist": {
+      "get": {
+        "summary": "Query: bound_violated → buleyean_dist",
+        "operationId": "buleyeanDist",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/constrained": {
+      "get": {
+        "summary": "Query: buleyean_dist → constrained",
+        "operationId": "constrained",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/retrocausal-bound.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/estimate": {
+      "get": {
+        "summary": "Query: hypotheses → estimate",
+        "operationId": "estimate",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/solomonoff-init.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/scale": {
+      "get": {
+        "summary": "Query: estimate → scale",
+        "operationId": "scale",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/solomonoff-init.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/init": {
+      "get": {
+        "summary": "Query: scale → init",
+        "operationId": "init",
+        "responses": {
+          "200": {
+            "description": "Returns GradientStep",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradientStep"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/solomonoff-init.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/buleyeanPrior": {
+      "get": {
+        "summary": "Query: void_boundary → buleyean_prior",
+        "operationId": "buleyeanPrior",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/solomonoff-init.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/prior": {
+      "get": {
+        "summary": "Query: buleyean_prior → prior",
+        "operationId": "prior",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/solomonoff-init.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/choose": {
+      "get": {
+        "summary": "Query: buleyean_dist → choose",
+        "operationId": "choose",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/execute": {
+      "get": {
+        "summary": "Query: choose → execute",
+        "operationId": "execute",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/observe": {
+      "get": {
+        "summary": "Query: execute → observe",
+        "operationId": "observe",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/accept": {
+      "get": {
+        "summary": "Query: observe → accept",
+        "operationId": "accept",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/reject": {
+      "get": {
+        "summary": "Query: accept → reject",
+        "operationId": "reject",
+        "responses": {
+          "200": {
+            "description": "Returns Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/voidUpdate": {
+      "get": {
+        "summary": "Query: reject → void_update",
+        "operationId": "voidUpdate",
+        "responses": {
+          "200": {
+            "description": "Returns GradientStep",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradientStep"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/entropy": {
+      "get": {
+        "summary": "Query: void_update → entropy",
+        "operationId": "entropy",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/kurtosis": {
+      "get": {
+        "summary": "Query: entropy → kurtosis",
+        "operationId": "kurtosis",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/inverseBule": {
+      "get": {
+        "summary": "Query: kurtosis → inverse_bule",
+        "operationId": "inverseBule",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/gaitSelect": {
+      "get": {
+        "summary": "Query: inverse_bule → gait_select",
+        "operationId": "gaitSelect",
+        "responses": {
+          "200": {
+            "description": "Returns Logic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logic"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/adapt": {
+      "get": {
+        "summary": "Query: gait_select → adapt",
+        "operationId": "adapt",
+        "responses": {
+          "200": {
+            "description": "Returns GradientStep",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradientStep"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "src/topologies/void-walk.gg",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/federationChain": {
+      "get": {
+        "summary": "Resolve a knotchain federation record by chain id.",
+        "operationId": "federationChain",
+        "responses": {
+          "200": {
+            "description": "Returns FederationChain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FederationChain"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "federation-projection",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/federationLookup": {
+      "get": {
+        "summary": "N1 two-step lookup (route + witness + admissible path proof).",
+        "operationId": "federationLookup",
+        "responses": {
+          "200": {
+            "description": "Returns FederationLookup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FederationLookup"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "federation-projection",
+        "x-graphql-projection": true
+      }
+    },
+    "/api/federationSnapshot": {
+      "get": {
+        "summary": "Fetch signed federation index snapshot metadata.",
+        "operationId": "federationSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returns FederationSnapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FederationSnapshot"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "graphql",
+          "x-gql"
+        ],
+        "x-gg-source": "federation-projection",
+        "x-graphql-projection": true
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "graphql"
+    },
+    {
+      "name": "x-gql"
+    }
+  ]
+}
