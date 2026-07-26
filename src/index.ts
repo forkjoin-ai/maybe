@@ -415,3 +415,15 @@ export {
   type VoidMapOptions as AbductionVoidMapOptions,
   type AbductionWasm,
 } from './abduction.js';
+
+// Audibility — the prior question to abduction: can this evidence separate these
+// explanations at all? Never-collapse protects the inference; this protects the observation.
+export {
+  auditAudibility,
+  assertAudible,
+  separability,
+  DEFAULT_AUDIBILITY_EPSILON,
+  type AudibilityReport,
+  type IndistinguishablePair,
+  type InertFeature,
+} from './audibility.js';
