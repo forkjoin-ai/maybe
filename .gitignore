@@ -2,3 +2,4 @@
 
 # Mandatory monorepo ignores (synced by a0)
 .wrangler/
+node_modules/
