@@ -416,6 +416,19 @@ export {
   type AbductionWasm,
 } from './abduction.js';
 
+export {
+  buildBangAbduction,
+  abduceBang,
+  observeProtectedC,
+  observeUnknownCodon,
+  observeClosedShell,
+  observeFreeCouple,
+  peptideSearchBracket,
+  peptideRejectionRecord,
+  type BangHypothesisId,
+  type BangFeature,
+} from './bang-abduction.js';
+
 // Audibility — the prior question to abduction: can this evidence separate these
 // explanations at all? Never-collapse protects the inference; this protects the observation.
 export {

@@ -7,6 +7,7 @@ Source module for the Src feature area.
 ## Key Files
 
 - `abduction.ts`: Source file in this module.
+- `bang-abduction.ts`: Peptide/bang hard-wall abduction + couple search bracket + RL rejection records. Brute-force enumeration of the admitted rectangle is `@a0n/aeon-crackerjack` `ChemistryBruteForce`.
 - `bule.ts`: Source file in this module.
 - `buleyean.test.ts`: Source file in this module.
 - `buleyean.ts`: Source file in this module.
