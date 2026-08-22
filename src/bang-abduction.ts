@@ -10,7 +10,7 @@
  * Not a ribosome and not a reward model.
  */
 
-import { buildAbduction, type AbductivePosterior, type Observation } from './abduction.ts';
+import { buildAbduction, type AbductivePosterior, type Observation } from './abduction.js';
 
 export type BangHypothesisId = 'couple' | 'refuseProtected' | 'refuseClosed' | 'refuseTranslation';
 
