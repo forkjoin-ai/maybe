@@ -2,6 +2,13 @@
 
 Buleyean probability as executable gnosis topologies.
 
+## Architecture and purpose
+
+This package turns rejection counts into normalized choice weights, then layers
+epistemic timescales and thermodynamic audits around that kernel. The formula is
+delegated to `@a0n/aeon-logic`; this package owns the executable probability and
+topology composition surface.
+
 Two numbers describe any system under irreversible process:
 - **Buleyean distribution** (compass: what to try next)
 - **Bule number** (altimeter: how far from convergence)
