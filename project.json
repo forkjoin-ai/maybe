@@ -1,0 +1,38 @@
+{
+  "name": "@a0n/maybe",
+  "sourceRoot": "open-source/maybe/src",
+  "projectType": "library",
+  "tags": [
+    "npm:public"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "a0:run-commands",
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "bun run type-check"
+      }
+    },
+    "test": {
+      "executor": "a0:run-commands",
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "bun run test"
+      }
+    }
+  }
+,
+  "targets": {
+    "build": {
+      "executor": "a0:run-commands",
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "echo source-only topology: checked-in package surface"
+      },
+      "metadata": { "topologyKind": "source-only" }
+    }
+  }
+}
