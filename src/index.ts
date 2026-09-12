@@ -60,6 +60,19 @@ export {
 } from '@a0n/aeon-logic/probability-routing';
 
 export {
+  selectJourneyCandidates,
+  type JourneyAbductionHint,
+  type JourneyPrefixWitness,
+  type JourneyResourceCost,
+  type JourneySelectionBudget,
+  type JourneySelectionCandidate,
+  type JourneySelectionInput,
+  type JourneySelectionResult,
+  type JourneyTraceMass,
+  type JourneyUtilityWitness,
+} from './journey-selection.js';
+
+export {
   BASELINE_CHORDONOMICON_TRANSITION_WEIGHTS,
   CHORDONOMICON_BASELINE_ROW_MASS,
   FUNCTION_CLASS,

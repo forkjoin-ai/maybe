@@ -6,6 +6,26 @@
     "npm:public"
   ],
   "targets": {
+    "typecheck:journeys": {
+      "executor": "a0:run-commands", "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/journey-selection.ts",
+        "monster": { "nodeLeaf": { "reason": "Check finite journey utility selection and its browser-safe probability dependency.", "args": ["../../node_modules/typescript/bin/tsc", "--noEmit", "--strict", "--target", "ES2022", "--module", "ESNext", "--moduleResolution", "bundler", "--skipLibCheck", "--types", "node", "src/journey-selection.ts"] } }
+      }
+    },
+    "test:journeys": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/journey-selection.test.ts",
+        "monster": { "nodeLeaf": {
+          "reason": "Verify finite observed-prefix probability, resource budgets, shared-prefix utility and evidence boundaries.",
+          "args": ["../gnosis/bin/gnode.js", "test", "src/journey-selection.test.ts"]
+        } }
+      }
+    },
     "typecheck": {
       "executor": "a0:run-commands",
       "dependsOn": [
@@ -22,10 +42,7 @@
         "cwd": "open-source/maybe",
         "command": "bun run test"
       }
-    }
-  }
-,
-  "targets": {
+    },
     "build": {
       "executor": "a0:run-commands",
       "options": {
