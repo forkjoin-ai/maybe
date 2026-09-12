@@ -192,7 +192,8 @@ export function buildHypothesisSpace(input: {
 }
 
 /**
- * Handles the maybe normalize Key workflow.
+ * Canonical feature key: trimmed, lower-cased, internal whitespace collapsed to
+ * one space. Feature lookup and "already observed" checks both go through it.
  */
 export function normalizeKey(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -201,7 +202,32 @@ export function normalizeKey(s: string): string {
 // ───────────────────────── channels ─────────────────────────
 
 /**
- * Handles the maybe feature Channel workflow.
+ * A denied feature falsifies a hypothesis that near-always shows it.
+ * Enabled only when `hardWallHi < 1`.
+ */
+function absentFeatureWalls(p: number, hardWallHi: number): boolean {
+  return hardWallHi < 1 && p >= hardWallHi;
+}
+
+/**
+ * A present feature falsifies a hypothesis that near-never shows it.
+ * Enabled only when `hardWallLo > 0`.
+ */
+function presentFeatureWalls(p: number, hardWallLo: number): boolean {
+  return hardWallLo > 0 && p <= hardWallLo;
+}
+
+function channelSummary(polarity: Polarity, wallCount: number): string {
+  const walls = `${wallCount} wall${wallCount === 1 ? '' : 's'}`;
+  return polarity === 'present'
+    ? `present: rules out hypotheses where near-absent (${walls})`
+    : `absent: rules out hypotheses where near-universal (${walls})`;
+}
+
+/**
+ * Rejection field of one observed feature: `-log P(obs | h)` per hypothesis,
+ * plus the hard falsification walls the observation implies. Returns null for a
+ * feature the space does not know, so unknown evidence never invents rejection.
  */
 export function featureChannel(
   space: HypothesisSpace,
@@ -217,15 +243,12 @@ export function featureChannel(
   const rejection = new Float64Array(n);
   const hardWall: boolean[] = new Array(n).fill(false);
   let wallCount = 0;
+  const isPresent = polarity === 'present';
   for (let h = 0; h < n; h++) {
     const p = clamp(space.pOf(h, f), EPS, 1 - EPS);
-    if (polarity === 'present') {
-      rejection[h] = -Math.log(p);
-      if (hardWallLo > 0 && p <= hardWallLo) { hardWall[h] = true; wallCount++; }
-    } else {
-      rejection[h] = -Math.log(1 - p);
-      if (hardWallHi < 1 && p >= hardWallHi) { hardWall[h] = true; wallCount++; }
-    }
+    rejection[h] = -Math.log(isPresent ? p : 1 - p);
+    const walls = isPresent ? presentFeatureWalls(p, hardWallLo) : absentFeatureWalls(p, hardWallHi);
+    if (walls) { hardWall[h] = true; wallCount++; }
   }
   return {
     feature,
@@ -234,15 +257,13 @@ export function featureChannel(
     rejection,
     hardWall,
     active: true,
-    summary:
-      polarity === 'present'
-        ? `present: rules out hypotheses where near-absent (${wallCount} wall${wallCount === 1 ? '' : 's'})`
-        : `absent: rules out hypotheses where near-universal (${wallCount} wall${wallCount === 1 ? '' : 's'})`,
+    summary: channelSummary(polarity, wallCount),
   };
 }
 
 /**
- * Handles the maybe prior Channel workflow.
+ * Base-rate channel: `-log prior` per hypothesis. Never walls anything, so the
+ * prior alone can shade but never eliminate a hypothesis.
  */
 export function priorChannel(space: HypothesisSpace): FeatureChannelVerdict {
   const n = space.size;
@@ -260,7 +281,8 @@ export function priorChannel(space: HypothesisSpace): FeatureChannelVerdict {
 }
 
 /**
- * Builds the Channels.
+ * The prior channel followed by one channel per known present feature, then one
+ * per known absent feature (unknown features are dropped).
  */
 export function buildChannels(
   space: HypothesisSpace,
@@ -290,7 +312,8 @@ export interface FuseResult {
 }
 
 /**
- * Handles the maybe flatten Channels workflow.
+ * Pack the active (weight > 0) channels into the row-major flat buffers the WASM
+ * kernel consumes: `[channel * n + hypothesis]` for rejection and hard walls.
  */
 export function flattenChannels(
   verdicts: readonly FeatureChannelVerdict[],
@@ -314,7 +337,10 @@ export function flattenChannels(
 }
 
 /**
- * Handles the maybe fuse workflow.
+ * Fuse channels with the God Formula: weighted rejection is summed per
+ * hypothesis, walled hypotheses get probability exactly 0, and every survivor
+ * gets the Buleyean complement weight (>= 1 before normalization). Uses the
+ * registered WASM kernel when present, else the bit-identical TS path.
  */
 export function fuse(
   space: HypothesisSpace,
@@ -344,6 +370,16 @@ function fuseTs(
   n: number,
   lambda: number,
 ): { posterior: Float64Array; rejection: Float64Array } {
+  const { rejection, walled } = accumulateRejection(verdicts, n);
+  const posterior = godFormulaPosterior(rejection, walled, lambda);
+  return { posterior, rejection };
+}
+
+/** Stage 1: sum weighted rejection per hypothesis and union the hard walls. */
+function accumulateRejection(
+  verdicts: readonly FeatureChannelVerdict[],
+  n: number,
+): { rejection: Float64Array; walled: boolean[] } {
   const rejection = new Float64Array(n);
   const walled: boolean[] = new Array(n).fill(false);
   for (const v of verdicts) {
@@ -353,8 +389,21 @@ function fuseTs(
       if (v.hardWall[h]) walled[h] = true;
     }
   }
+  return { rejection, walled };
+}
+
+/**
+ * Stage 2: Buleyean complement weights against R = the largest surviving
+ * rejection, sharpened by lambda and normalized. Walled hypotheses stay at 0.
+ */
+function godFormulaPosterior(rejection: Float64Array, walled: readonly boolean[], lambda: number): Float64Array {
+  const n = rejection.length;
   let R = 0;
-  for (let h = 0; h < n; h++) if (!walled[h] && rejection[h]! > R) R = rejection[h]!;
+  for (let h = 0; h < n; h++) {
+    if (walled[h]) continue;
+    const r = rejection[h]!;
+    if (r > R) R = r; // not Math.max: a NaN rejection must not poison R
+  }
   const posterior = new Float64Array(n);
   let sum = 0;
   for (let h = 0; h < n; h++) {
@@ -364,14 +413,74 @@ function fuseTs(
     posterior[h] = w;
     sum += w;
   }
-  if (sum > 0) for (let h = 0; h < n; h++) posterior[h] = posterior[h]! / sum;
-  return { posterior, rejection };
+  if (sum > 0) {
+    for (let h = 0; h < n; h++) posterior[h] = posterior[h]! / sum;
+  }
+  return posterior;
 }
 
 // ───────────────────────── next probe (the Sherlock question) ─────────────────────────
 
 /**
- * Handles the maybe next Probes workflow.
+ * The hallmark question: among unobserved features this hypothesis near-always
+ * shows (p >= 0.5), the one whose ABSENCE would hurt it most, preferring
+ * features that would hard-wall it outright.
+ */
+function hallmarkProbe(
+  space: HypothesisSpace,
+  surv: Survivor,
+  seen: ReadonlySet<string>,
+  hardWallHi: number,
+): NextProbe | null {
+  let best: NextProbe | null = null;
+  let bestRank = -1;
+  for (let f = 0; f < space.features.length; f++) {
+    const name = space.features[f]!;
+    if (seen.has(normalizeKey(name))) continue;
+    const p = space.pOf(surv.id, f);
+    if (p < 0.5) continue;
+    const wouldBeHardWall = absentFeatureWalls(p, hardWallHi);
+    const leverage = p;
+    const rank = (wouldBeHardWall ? 1 : 0) * 10 + leverage;
+    if (rank > bestRank) {
+      bestRank = rank;
+      best = { hypothesisId: surv.id, feature: name, rulingPolarity: 'absent', leverage, wouldBeHardWall };
+    }
+  }
+  return best;
+}
+
+/**
+ * Fallback when the hypothesis has no hallmark left: the unobserved feature it
+ * is least likely to show, whose PRESENCE would count against it.
+ */
+function rareFeatureProbe(
+  space: HypothesisSpace,
+  surv: Survivor,
+  seen: ReadonlySet<string>,
+  hardWallLo: number,
+): NextProbe | null {
+  let lowP = Infinity;
+  let lowName = '';
+  for (let f = 0; f < space.features.length; f++) {
+    const name = space.features[f]!;
+    if (seen.has(normalizeKey(name))) continue;
+    const p = space.pOf(surv.id, f);
+    if (p < lowP) { lowP = p; lowName = name; }
+  }
+  if (!lowName) return null;
+  return {
+    hypothesisId: surv.id,
+    feature: lowName,
+    rulingPolarity: 'present',
+    leverage: 1 - lowP,
+    wouldBeHardWall: presentFeatureWalls(lowP, hardWallLo),
+  };
+}
+
+/**
+ * For each of the top-k survivors, the single unobserved feature that would most
+ * sharply test it (at most one probe per survivor, so at most k probes).
  */
 export function nextProbes(
   space: HypothesisSpace,
@@ -382,47 +491,10 @@ export function nextProbes(
   k = DEFAULTS.probeK,
 ): NextProbe[] {
   const seen = new Set(observed.map(normalizeKey));
-  const out: NextProbe[] = [];
-  for (const surv of survivors.slice(0, k)) {
-    let best: NextProbe | null = null;
-    let bestRank = -1;
-    for (let f = 0; f < space.features.length; f++) {
-      const name = space.features[f]!;
-      if (seen.has(normalizeKey(name))) continue;
-      const p = space.pOf(surv.id, f);
-      // The hallmark question: a feature this hypothesis near-always shows. If it
-      // is ABSENT, the hypothesis drops sharply (hard-walled when >= hardWallHi).
-      if (p < 0.5) continue;
-      const wouldBeHardWall = hardWallHi < 1 && p >= hardWallHi;
-      const leverage = p;
-      const rank = (wouldBeHardWall ? 1 : 0) * 10 + leverage;
-      if (rank > bestRank) {
-        bestRank = rank;
-        best = { hypothesisId: surv.id, feature: name, rulingPolarity: 'absent', leverage, wouldBeHardWall };
-      }
-    }
-    if (!best) {
-      let lowP = Infinity;
-      let lowName = '';
-      for (let f = 0; f < space.features.length; f++) {
-        const name = space.features[f]!;
-        if (seen.has(normalizeKey(name))) continue;
-        const p = space.pOf(surv.id, f);
-        if (p < lowP) { lowP = p; lowName = name; }
-      }
-      if (lowName) {
-        best = {
-          hypothesisId: surv.id,
-          feature: lowName,
-          rulingPolarity: 'present',
-          leverage: 1 - lowP,
-          wouldBeHardWall: hardWallLo > 0 && lowP <= hardWallLo,
-        };
-      }
-    }
-    if (best) out.push(best);
-  }
-  return out;
+  const probes = survivors
+    .slice(0, k)
+    .map((surv) => hallmarkProbe(space, surv, seen, hardWallHi) ?? rareFeatureProbe(space, surv, seen, hardWallLo));
+  return probes.filter((probe): probe is NextProbe => probe !== null);
 }
 
 // ───────────────────────── factorization (multi-root-cause) ─────────────────────────
@@ -432,46 +504,58 @@ const MARGINAL_MIN = 0.15;
 const MAX_FACTORS = 4;
 
 /**
- * Handles the maybe factorize workflow.
+ * The unused survivor that best explains the still-uncovered present features:
+ * score = likelihood mass over them times (0.5 + posterior). `covers` lists the
+ * features it shows with p >= COVER_P. Null when no survivor scores above 0.
+ */
+function bestCoveringSurvivor(
+  space: HypothesisSpace,
+  survivors: readonly Survivor[],
+  uncovered: ReadonlySet<number>,
+  used: ReadonlySet<number>,
+): { surv: Survivor; covers: number[] } | null {
+  let best: { surv: Survivor; covers: number[] } | null = null;
+  let bestScore = 0;
+  for (const surv of survivors) {
+    if (used.has(surv.id)) continue;
+    let mass = 0;
+    const covers: number[] = [];
+    for (const f of uncovered) {
+      const p = space.pOf(surv.id, f);
+      mass += p;
+      if (p >= COVER_P) covers.push(f);
+    }
+    const score = mass * (0.5 + surv.probability);
+    if (score > bestScore) { bestScore = score; best = { surv, covers }; }
+  }
+  return best;
+}
+
+/**
+ * Multi-root-cause decomposition: greedy set cover of the present features by
+ * survivors. Stops at MAX_FACTORS, when everything is covered, or when the next
+ * factor would explain less than MARGINAL_MIN of the present features.
  */
 export function factorize(
   space: HypothesisSpace,
   survivors: readonly Survivor[],
   present: readonly string[],
 ): Factor[] {
-  const presentIdx: number[] = [];
-  for (const f of present) {
-    const i = space.featureIndex(normalizeKey(f));
-    if (i >= 0) presentIdx.push(i);
-  }
+  const presentIdx = present.map((f) => space.featureIndex(normalizeKey(f))).filter((i) => i >= 0);
   if (presentIdx.length === 0 || survivors.length === 0) return [];
   const uncovered = new Set(presentIdx);
   const used = new Set<number>();
   const factors: Factor[] = [];
   const total = presentIdx.length;
   while (uncovered.size > 0 && factors.length < MAX_FACTORS) {
-    let bestSurv: Survivor | null = null;
-    let bestScore = 0;
-    let bestCovers: number[] = [];
-    for (const surv of survivors) {
-      if (used.has(surv.id)) continue;
-      let mass = 0;
-      const covers: number[] = [];
-      for (const f of uncovered) {
-        const p = space.pOf(surv.id, f);
-        mass += p;
-        if (p >= COVER_P) covers.push(f);
-      }
-      const score = mass * (0.5 + surv.probability);
-      if (score > bestScore) { bestScore = score; bestSurv = surv; bestCovers = covers; }
-    }
-    if (!bestSurv) break;
-    const marginal = bestCovers.length / total;
-    if (factors.length > 0 && marginal < MARGINAL_MIN) break;
-    factors.push({ hypothesisId: bestSurv.id, name: bestSurv.name, amplitude: clamp01((bestCovers.length || 1) / total) });
-    used.add(bestSurv.id);
-    if (bestCovers.length === 0) break;
-    for (const f of bestCovers) uncovered.delete(f);
+    const best = bestCoveringSurvivor(space, survivors, uncovered, used);
+    if (!best) break;
+    const { surv, covers } = best;
+    if (factors.length > 0 && covers.length / total < MARGINAL_MIN) break;
+    factors.push({ hypothesisId: surv.id, name: surv.name, amplitude: clamp01((covers.length || 1) / total) });
+    used.add(surv.id);
+    if (covers.length === 0) break;
+    for (const f of covers) uncovered.delete(f);
   }
   return factors;
 }
@@ -524,9 +608,7 @@ export class Abduction {
   }
 }
 
-/**
- * Builds the Abduction.
- */
+/** Convenience: build the hypothesis space from a likelihood matrix and wrap it in an engine. */
 export function buildAbduction(
   input: Parameters<typeof buildHypothesisSpace>[0],
   opts?: AbduceOptions,
@@ -563,12 +645,21 @@ function buildSurvivorsEliminated(
   return { survivors, eliminated };
 }
 
+/** Shannon entropy (nats) of the survivor posterior; zero-probability entries contribute nothing. */
+function posteriorEntropy(survivors: readonly Survivor[]): number {
+  let entropy = 0;
+  for (const s of survivors) {
+    if (s.probability > 0) entropy -= s.probability * Math.log(s.probability);
+  }
+  return entropy;
+}
+
 /**
- * Handles the maybe void Metrics workflow.
+ * Shape of the surviving posterior: entropy, effective survivor count
+ * (exp entropy), and concentration = 1 - entropy / log(survivorCount).
  */
 export function voidMetrics(survivors: Survivor[], totalHypotheses: number): AbductivePosterior['void'] {
-  let entropy = 0;
-  for (const s of survivors) if (s.probability > 0) entropy -= s.probability * Math.log(s.probability);
+  const entropy = posteriorEntropy(survivors);
   const maxEntropy = survivors.length > 1 ? Math.log(survivors.length) : 1;
   const concentration = maxEntropy > 0 ? 1 - entropy / maxEntropy : 1;
   return {
@@ -617,8 +708,21 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+type VoidSampling = Required<Omit<VoidMapOptions, 'hardWallHi' | 'hardWallLo'>>;
+
+/** Per-hypothesis tallies accumulated over the nested Monte Carlo draws. */
+interface VoidTallies {
+  readonly mass: ArrayLike<number>;
+  readonly top: ArrayLike<number>;
+  readonly survival: ArrayLike<number>;
+  readonly totalDraws: number;
+}
+
 /**
- * Handles the maybe map Void workflow.
+ * Nested Monte Carlo robustness map: the outer loop jitters every non-prior
+ * channel weight and re-fuses; the inner loop draws hypotheses from that
+ * posterior. Cells report draw mass, top-3 rank stability, and survival rate
+ * per hypothesis. Uses the registered WASM kernel when present.
  */
 export function mapVoid(
   space: HypothesisSpace,
@@ -626,74 +730,97 @@ export function mapVoid(
   absent: readonly string[],
   opts: VoidMapOptions,
 ): VoidMap {
-  const outerSamples = opts.outerSamples ?? 256;
-  const innerSamples = opts.innerSamples ?? 64;
-  const jitter = opts.jitter ?? 0.35;
-  const seed = opts.seed ?? 0x9e3779b9;
-  const lambda = opts.lambda ?? 1.0;
-  const n = space.size;
+  const sampling: VoidSampling = {
+    outerSamples: opts.outerSamples ?? 256,
+    innerSamples: opts.innerSamples ?? 64,
+    jitter: opts.jitter ?? 0.35,
+    seed: opts.seed ?? 0x9e3779b9,
+    lambda: opts.lambda ?? 1.0,
+  };
   const base = buildChannels(space, present, absent, opts.hardWallHi, opts.hardWallLo);
-
   const wasm = getAbductionWasm();
-  if (wasm) {
-    const { active, rejectionFlat, weights, hardwallFlat } = flattenChannels(base, n);
-    const perturbable = new Uint8Array(active.length);
-    for (let i = 0; i < active.length; i++) perturbable[i] = active[i]!.feature === '(prior)' ? 0 : 1;
-    const out = wasm.map_void(
-      rejectionFlat, weights, hardwallFlat, perturbable,
-      n, active.length, outerSamples, innerSamples, jitter, lambda, seed >>> 0,
-    );
-    const totalDraws = outerSamples * innerSamples;
-    const cells: VoidCell[] = [];
-    for (let h = 0; h < n; h++) {
-      const mass = out[h]!; const top = out[n + h]!; const surv = out[2 * n + h]!;
-      if (mass === 0 && surv === 0) continue;
-      cells.push({
-        id: h, name: space.hypothesisOf(h).name,
-        mass: totalDraws > 0 ? mass / totalDraws : 0,
-        rankStability: top / outerSamples, survival: surv / outerSamples,
-      });
-    }
-    cells.sort((a, b) => b.mass - a.mass);
-    return { method: 'abduction_void_map_nested_mc_wasm_v1', cells, meanEntropy: out[3 * n]! / outerSamples, outerSamples, innerSamples };
-  }
+  return wasm ? mapVoidWasm(wasm, space, base, sampling) : mapVoidTs(space, base, sampling);
+}
 
+function mapVoidWasm(
+  wasm: AbductionWasm,
+  space: HypothesisSpace,
+  base: readonly FeatureChannelVerdict[],
+  { outerSamples, innerSamples, jitter, seed, lambda }: VoidSampling,
+): VoidMap {
+  const n = space.size;
+  const { active, rejectionFlat, weights, hardwallFlat } = flattenChannels(base, n);
+  const perturbable = new Uint8Array(active.length);
+  for (let i = 0; i < active.length; i++) perturbable[i] = active[i]!.feature === '(prior)' ? 0 : 1;
+  // Output layout: [mass(n), top(n), survival(n), entropySum].
+  const out = wasm.map_void(
+    rejectionFlat, weights, hardwallFlat, perturbable,
+    n, active.length, outerSamples, innerSamples, jitter, lambda, seed >>> 0,
+  );
+  const cells = collectVoidCells(space, {
+    mass: out.subarray(0, n),
+    top: out.subarray(n, 2 * n),
+    survival: out.subarray(2 * n, 3 * n),
+    totalDraws: outerSamples * innerSamples,
+  }, outerSamples);
+  return { method: 'abduction_void_map_nested_mc_wasm_v1', cells, meanEntropy: out[3 * n]! / outerSamples, outerSamples, innerSamples };
+}
+
+function mapVoidTs(
+  space: HypothesisSpace,
+  base: readonly FeatureChannelVerdict[],
+  { outerSamples, innerSamples, jitter, seed, lambda }: VoidSampling,
+): VoidMap {
+  const n = space.size;
   const rng = mulberry32(seed);
-  const massTally = new Float64Array(n);
-  const topTally = new Float64Array(n);
-  const survivalTally = new Float64Array(n);
+  const mass = new Float64Array(n);
+  const top = new Float64Array(n);
+  const survival = new Float64Array(n);
   let entropySum = 0;
-  let totalDraws = 0;
   for (let o = 0; o < outerSamples; o++) {
     const perturbed: FeatureChannelVerdict[] = base.map((v) =>
       v.feature === '(prior)' ? v : { ...v, weight: Math.max(0, 1 - jitter * rng()) },
     );
     const fused = fuse(space, perturbed, lambda);
     const { survivors } = buildSurvivorsEliminated(space, perturbed, fused);
-    for (const s of survivors) survivalTally[s.id] = survivalTally[s.id]! + 1;
-    for (const s of survivors.slice(0, 3)) topTally[s.id] = topTally[s.id]! + 1;
-    let H = 0;
-    for (const s of survivors) if (s.probability > 0) H -= s.probability * Math.log(s.probability);
-    entropySum += H;
+    for (const s of survivors) survival[s.id] = survival[s.id]! + 1;
+    for (const s of survivors.slice(0, 3)) top[s.id] = top[s.id]! + 1;
+    entropySum += posteriorEntropy(survivors);
     for (let i = 0; i < innerSamples; i++) {
-      let r = rng();
-      let pick = survivors[0]?.id ?? 0;
-      for (const s of survivors) { r -= s.probability; if (r <= 0) { pick = s.id; break; } }
-      massTally[pick] = massTally[pick]! + 1;
-      totalDraws += 1;
+      const pick = sampleSurvivor(survivors, rng());
+      mass[pick] = mass[pick]! + 1;
     }
   }
+  const cells = collectVoidCells(space, { mass, top, survival, totalDraws: outerSamples * innerSamples }, outerSamples);
+  return { method: 'abduction_void_map_nested_mc_v1', cells, meanEntropy: entropySum / outerSamples, outerSamples, innerSamples };
+}
+
+/** Inverse-CDF draw from the survivor posterior; falls back to the top survivor (or 0) on rounding. */
+function sampleSurvivor(survivors: readonly Survivor[], u: number): number {
+  let r = u;
+  for (const s of survivors) {
+    r -= s.probability;
+    if (r <= 0) return s.id;
+  }
+  return survivors[0]?.id ?? 0;
+}
+
+/** Normalize tallies into cells (hypotheses never drawn nor surviving are omitted), heaviest first. */
+function collectVoidCells(space: HypothesisSpace, tallies: VoidTallies, outerSamples: number): VoidCell[] {
+  const { totalDraws } = tallies;
   const cells: VoidCell[] = [];
-  for (let h = 0; h < n; h++) {
-    if (massTally[h] === 0 && survivalTally[h] === 0) continue;
+  for (let h = 0; h < space.size; h++) {
+    const mass = tallies.mass[h]!;
+    const survival = tallies.survival[h]!;
+    if (mass === 0 && survival === 0) continue;
     cells.push({
       id: h, name: space.hypothesisOf(h).name,
-      mass: totalDraws > 0 ? massTally[h]! / totalDraws : 0,
-      rankStability: topTally[h]! / outerSamples, survival: survivalTally[h]! / outerSamples,
+      mass: totalDraws > 0 ? mass / totalDraws : 0,
+      rankStability: tallies.top[h]! / outerSamples, survival: survival / outerSamples,
     });
   }
   cells.sort((a, b) => b.mass - a.mass);
-  return { method: 'abduction_void_map_nested_mc_v1', cells, meanEntropy: entropySum / outerSamples, outerSamples, innerSamples };
+  return cells;
 }
 
 // ───────────────────────── WASM kernel (injected by the consumer) ─────────────────────────
@@ -721,15 +848,11 @@ let wasmKernel: AbductionWasm | null = null;
 export function setAbductionWasm(kernel: AbductionWasm | null): void {
   wasmKernel = kernel;
 }
-/**
- * Handles the maybe get Abduction Wasm workflow.
- */
+/** The registered WASM fusion kernel, or null when the pure-TS path is in use. */
 export function getAbductionWasm(): AbductionWasm | null {
   return wasmKernel;
 }
-/**
- * Returns whether is Abduction Wasm Ready is true.
- */
+/** True once a WASM fusion kernel has been registered via `setAbductionWasm`. */
 export function isAbductionWasmReady(): boolean {
   return wasmKernel !== null;
 }

@@ -83,28 +83,12 @@ export function auditAudibility(
   epsilon: number = DEFAULT_AUDIBILITY_EPSILON
 ): AudibilityReport {
   const n = space.size;
-  const features = space.features;
-  const nFeatures = features.length;
-
   const indistinguishable: IndistinguishablePair[] = [];
   let minSeparation = Number.POSITIVE_INFINITY;
 
   for (let i = 0; i < n; i += 1) {
     for (let j = i + 1; j < n; j += 1) {
-      let maxGap = 0;
-      let closestFeature: string | null = null;
-
-      for (let f = 0; f < nFeatures; f += 1) {
-        const gap = Math.abs(
-          space.pFeatureGivenHypothesis[i * nFeatures + f]! -
-            space.pFeatureGivenHypothesis[j * nFeatures + f]!
-        );
-        if (gap > maxGap) {
-          maxGap = gap;
-          closestFeature = features[f]!;
-        }
-      }
-
+      const { gap: maxGap, feature: closestFeature } = largestLikelihoodGap(space, i, j);
       if (maxGap < minSeparation) minSeparation = maxGap;
 
       if (maxGap <= epsilon) {
@@ -118,6 +102,46 @@ export function auditAudibility(
     }
   }
 
+  return {
+    audible: indistinguishable.length === 0,
+    indistinguishable,
+    inertFeatures: findInertFeatures(space, epsilon),
+    minSeparation: Number.isFinite(minSeparation) ? minSeparation : 0,
+    epsilon,
+  };
+}
+
+/**
+ * Largest per-feature likelihood gap between the hypotheses at row indices `i` and `j`, and
+ * the feature where it occurs (the first such feature on ties; null when no feature differs).
+ */
+function largestLikelihoodGap(
+  space: HypothesisSpace,
+  i: number,
+  j: number
+): { gap: number; feature: string | null } {
+  const features = space.features;
+  const nFeatures = features.length;
+  let gap = 0;
+  let feature: string | null = null;
+  for (let f = 0; f < nFeatures; f += 1) {
+    const d = Math.abs(
+      space.pFeatureGivenHypothesis[i * nFeatures + f]! -
+        space.pFeatureGivenHypothesis[j * nFeatures + f]!
+    );
+    if (d > gap) {
+      gap = d;
+      feature = features[f]!;
+    }
+  }
+  return { gap, feature };
+}
+
+/** Features whose likelihood spread (max - min over all hypotheses) is within epsilon. */
+function findInertFeatures(space: HypothesisSpace, epsilon: number): InertFeature[] {
+  const n = space.size;
+  const features = space.features;
+  const nFeatures = features.length;
   const inertFeatures: InertFeature[] = [];
   for (let f = 0; f < nFeatures; f += 1) {
     let lo = Number.POSITIVE_INFINITY;
@@ -132,14 +156,7 @@ export function auditAudibility(
       inertFeatures.push({ feature: features[f]!, spread });
     }
   }
-
-  return {
-    audible: indistinguishable.length === 0,
-    indistinguishable,
-    inertFeatures,
-    minSeparation: Number.isFinite(minSeparation) ? minSeparation : 0,
-    epsilon,
-  };
+  return inertFeatures;
 }
 
 /**
@@ -178,8 +195,6 @@ export function separability(
   hypothesisIdB: number,
   epsilon: number = DEFAULT_AUDIBILITY_EPSILON
 ): { separable: boolean; separator: string | null; gap: number } {
-  const features = space.features;
-  const nFeatures = features.length;
   const indexOf = (id: number): number =>
     space.hypotheses.findIndex((h) => h.id === id);
 
@@ -191,19 +206,7 @@ export function separability(
     );
   }
 
-  let gap = 0;
-  let separator: string | null = null;
-  for (let f = 0; f < nFeatures; f += 1) {
-    const d = Math.abs(
-      space.pFeatureGivenHypothesis[i * nFeatures + f]! -
-        space.pFeatureGivenHypothesis[j * nFeatures + f]!
-    );
-    if (d > gap) {
-      gap = d;
-      separator = features[f]!;
-    }
-  }
-
+  const { gap, feature: separator } = largestLikelihoodGap(space, i, j);
   const separable = gap > epsilon;
   return { separable, separator: separable ? separator : null, gap };
 }

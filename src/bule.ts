@@ -228,6 +228,10 @@ export function teleportBuleState(
  * Returns the deficit at each future round until convergence.
  */
 export function convergenceSchedule(currentBule: number): number[] {
+  if (currentBule === Infinity) {
+    // k <= Infinity never terminates: the array would grow until the process dies.
+    throw new RangeError('convergenceSchedule: an infinite Bule has no finite schedule');
+  }
   const schedule: number[] = [];
   for (let k = 0; k <= currentBule; k++) {
     schedule.push(currentBule - k);
@@ -437,7 +441,14 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
   }
   const n = firstDistribution.length;
 
-  // Compute mean distribution
+  const mean = meanDistribution(distributions, n);
+  const weights = divergenceWeights(distributions, mean);
+  return renormalize(weightedSum(distributions, weights, n));
+}
+
+/** Pointwise mean of the distributions over the first `n` indices (missing entries count as absent). */
+function meanDistribution(distributions: number[][], n: number): number[] {
+  const k = distributions.length;
   const mean = new Array(n).fill(0);
   for (const dist of distributions) {
     for (let i = 0; i < n; i++) {
@@ -447,11 +458,18 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
       }
     }
   }
+  return mean;
+}
 
-  // Compute L2 divergence from mean for each agent
+/**
+ * Each agent's share of the total L2 divergence from the mean. When every agent agrees
+ * (total divergence ~ 0) the weights fall back to uniform.
+ */
+function divergenceWeights(distributions: number[][], mean: number[]): number[] {
+  const k = distributions.length;
   const divergences: number[] = distributions.map((dist) => {
     let l2 = 0;
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < mean.length; i++) {
       const value = dist[i];
       const diff = (value === undefined ? 0 : value) - mean[i];
       l2 += diff * diff;
@@ -459,22 +477,19 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
     return Math.sqrt(l2);
   });
 
-  // Weight by divergence (+ epsilon to avoid division by zero)
   const totalDiv = divergences.reduce((s, d) => s + d, 0);
-  const weights =
-    totalDiv > 1e-12
-      ? divergences.map((d) => d / totalDiv)
-      : new Array(k).fill(1 / k); // equal weights if all agree
+  return totalDiv > 1e-12
+    ? divergences.map((d) => d / totalDiv)
+    : new Array(k).fill(1 / k);
+}
 
-  // Weighted fold
+/** Sum of weight_j * distribution_j over the first `n` indices. */
+function weightedSum(distributions: number[][], weights: number[], n: number): number[] {
   const result = new Array(n).fill(0);
-  for (let j = 0; j < k; j++) {
+  for (let j = 0; j < distributions.length; j++) {
     const distribution = distributions[j];
-    if (distribution === undefined) {
-      continue;
-    }
     const weight = weights[j];
-    if (weight === undefined) {
+    if (distribution === undefined || weight === undefined) {
       continue;
     }
     for (let i = 0; i < n; i++) {
@@ -484,16 +499,18 @@ export function deficitWeightedFold(distributions: number[][]): number[] {
       }
     }
   }
+  return result;
+}
 
-  // Renormalize
-  const sum = result.reduce((s, v) => s + v, 0);
+/** Scale in place so the entries sum to 1; a non-positive sum is left untouched. */
+function renormalize(values: number[]): number[] {
+  const sum = values.reduce((s, v) => s + v, 0);
   if (sum > 0) {
-    for (let i = 0; i < n; i++) {
-      result[i] /= sum;
+    for (let i = 0; i < values.length; i++) {
+      values[i] /= sum;
     }
   }
-
-  return result;
+  return values;
 }
 
 /**
