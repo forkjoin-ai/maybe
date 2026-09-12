@@ -6,6 +6,16 @@ Source module for the Src feature area.
 
 ## Key Files
 
+- `memory-abduction.ts`: Pure JSON adapter over `buildAbduction` for Moonshine's
+  memory paths. Positive learned strengths form priors; observed heuristic
+  signals rank candidates with hard walls disabled. Missing signals remain 0.5.
+  No observations produces no ranking. Reports indistinguishable evidence and
+  at most three discriminating local probes; the caller owns scope, relevance
+  admission and probe execution. Weights are not empirical confidence. Embedded
+  dependency closure: this file, `abduction.ts`, and `@a0n/buleyean-kernel`.
+- `memory-abduction.test.ts`: Actual-engine fixture parity, finite normalized
+  weights, unknown evidence, disabled walls and bounded-input checks.
+
 - `journey-selection.ts`: Ordered-prefix probabilities over a bounded observed
   trace census, then greedy marginal visible-wait selection under byte, parse,
   build and candidate budgets. Shared resources cost once and overlapping
@@ -44,3 +54,9 @@ Run the closest package or app-level check through the repository-owned `a0` or 
 
 Journey selection checks: `a0 run @a0n/maybe:test:journeys` and
 `a0 run @a0n/maybe:typecheck:journeys`.
+
+Memory adapter checks: `a0 run @a0n/maybe:test:memory` and
+`a0 run @a0n/maybe:typecheck:memory`.
+
+Moonshine's `moonshine:test:mycelial-memory` target verifies packaged adapter
+execution through its linked native evaluator.

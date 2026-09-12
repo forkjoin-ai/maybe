@@ -29,6 +29,15 @@ Three provable axioms (mechanized in Lean 4, zero sorry):
 
 ## Modules
 
+### Memory path abduction (`memory-abduction.ts`)
+
+`rankMemoryPaths` (also exported as `app` for embedded evaluation) ranks a bounded
+set of local memory paths through the existing abductive engine. It preserves
+unknown signals, disables heuristic hard walls, and proposes up to three local
+probes. Learned path strengths supply priors; ranking weights do not establish
+relevance or empirical confidence. Moonshine owns relevance admission, source
+scope and feedback. See [source contracts and checks](src/README.md).
+
 ### Core (`buleyean.ts`)
 The formula. Delegates to `@a0n/aeon-logic` as single source of truth.
 
