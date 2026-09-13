@@ -59,14 +59,35 @@
       ],
       "options": {
         "cwd": "open-source/maybe",
-        "command": "bun run type-check"
+        "command": "../gnosis/bin/monster x tsc --noEmit -p tsconfig.json",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Typecheck the whole Maybe package against its tsconfig.",
+            "args": [
+              "../../node_modules/typescript/bin/tsc",
+              "--noEmit",
+              "-p",
+              "tsconfig.json"
+            ]
+          }
+        }
       }
     },
     "test": {
       "executor": "a0:run-commands",
       "options": {
         "cwd": "open-source/maybe",
-        "command": "bun run test"
+        "command": "../gnosis/bin/monster test src",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Run every Maybe package test through the repo-owned Gnosis test runner.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src"
+            ]
+          }
+        }
       }
     },
     "build": {
