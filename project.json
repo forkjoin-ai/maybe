@@ -16,7 +16,9 @@
           "nodeLeaf": {
             "reason": "Check finite journey utility selection and its browser-safe probability dependency.",
             "args": [
-              "../../node_modules/typescript/bin/tsc",
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
               "--noEmit",
               "--strict",
               "--target",
@@ -64,7 +66,9 @@
           "nodeLeaf": {
             "reason": "Typecheck the whole Maybe package against its tsconfig.",
             "args": [
-              "../../node_modules/typescript/bin/tsc",
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
               "--noEmit",
               "-p",
               "tsconfig.json"
@@ -128,7 +132,9 @@
           "nodeLeaf": {
             "reason": "Verify the bounded memory adapter against the actual Maybe abductive engine.",
             "args": [
-              "../../node_modules/typescript/bin/tsc",
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
               "--noEmit",
               "--strict",
               "--target",
