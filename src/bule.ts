@@ -470,8 +470,9 @@ function divergenceWeights(distributions: number[][], mean: number[]): number[] 
   const divergences: number[] = distributions.map((dist) => {
     let l2 = 0;
     for (let i = 0; i < mean.length; i++) {
-      const value = dist[i];
-      const diff = (value === undefined ? 0 : value) - mean[i];
+      const value = dist[i] ?? 0;
+      const meanValue = mean[i] ?? 0;
+      const diff = value - meanValue;
       l2 += diff * diff;
     }
     return Math.sqrt(l2);
@@ -507,7 +508,7 @@ function renormalize(values: number[]): number[] {
   const sum = values.reduce((s, v) => s + v, 0);
   if (sum > 0) {
     for (let i = 0; i < values.length; i++) {
-      values[i] /= sum;
+      values[i] = (values[i] ?? 0) / sum;
     }
   }
   return values;
