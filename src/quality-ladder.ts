@@ -195,7 +195,7 @@ export function tableScore(s: number, table: SealedExpTable): number {
       'tableScore: index ' + String(s) + ' outside the sealed table [0, ' + table.d + ']',
     );
   }
-  return table.entries[s];
+  return table.entries[s] ?? 0;
 }
 
 /** The sealed-table description in the Hope Jar shape (entries, bytes, hash). */
@@ -284,7 +284,7 @@ export function hammingSoftmax(
 
   let smax = -Infinity;
   for (let i = 0; i < n; i++) {
-    const s = scores[i];
+    const s = scores[i] ?? 0;
     if (!Number.isInteger(s) || s < 0 || s > table.d) {
       throw new RangeError('hammingSoftmax: score ' + String(s) + ' outside [0, ' + table.d + ']');
     }
@@ -295,11 +295,11 @@ export function hammingSoftmax(
   const weights = new Array<number>(n);
   let sum = 0;
   for (let i = 0; i < n; i++) {
-    const e = tableScore(scores[i] + shift, table);
+    const e = tableScore((scores[i] ?? 0) + shift, table);
     weights[i] = e;
     sum += e;
   }
-  for (let i = 0; i < n; i++) weights[i] = weights[i] / sum;
+  for (let i = 0; i < n; i++) weights[i] = (weights[i] ?? 0) / sum;
   return { weights, expCalls: _mathExpCalls - before, tableLookups: n };
 }
 
@@ -308,15 +308,15 @@ export function exactSoftmax(scores: readonly number[]): number[] {
   const n = scores.length;
   if (n === 0) return [];
   let m = -Infinity;
-  for (let i = 0; i < n; i++) if (scores[i] > m) m = scores[i];
+  for (let i = 0; i < n; i++) { const s = scores[i] ?? 0; if (s > m) m = s; }
   const weights = new Array<number>(n);
   let z = 0;
   for (let i = 0; i < n; i++) {
-    const e = Math.exp(scores[i] - m);
+    const e = Math.exp((scores[i] ?? 0) - m);
     weights[i] = e;
     z += e;
   }
-  for (let i = 0; i < n; i++) weights[i] = weights[i] / z;
+  for (let i = 0; i < n; i++) weights[i] = (weights[i] ?? 0) / z;
   return weights;
 }
 
@@ -330,19 +330,19 @@ export function buleyeanAffine(scores: readonly number[], R: number, C?: number)
   const n = scores.length;
   if (n === 0) return [];
   let smax = 0;
-  for (let i = 0; i < n; i++) if (scores[i] > smax) smax = scores[i];
+  for (let i = 0; i < n; i++) { const s = scores[i] ?? 0; if (s > smax) smax = s; }
   const bound = C !== undefined && C > 0 ? C : smax > 0 ? smax : 1;
   const beta = R / bound;
 
   const weights = new Array<number>(n);
   let sum = 0;
   for (let i = 0; i < n; i++) {
-    const v = -beta * scores[i];
+    const v = -beta * (scores[i] ?? 0);
     const w = R - Math.min(v, R) + 1;
     weights[i] = w;
     sum += w;
   }
-  for (let i = 0; i < n; i++) weights[i] = weights[i] / sum;
+  for (let i = 0; i < n; i++) weights[i] = (weights[i] ?? 0) / sum;
   return weights;
 }
 
@@ -361,8 +361,9 @@ export function concentrationCeiling(scores: readonly number[], C?: number): num
   let smax = 0;
   let sum = 0;
   for (let i = 0; i < n; i++) {
-    if (scores[i] > smax) smax = scores[i];
-    sum += scores[i];
+    const s = scores[i] ?? 0;
+    if (s > smax) smax = s;
+    sum += s;
   }
   const bound = C !== undefined && C > 0 ? C : smax > 0 ? smax : 1;
   return (bound + smax) / (n * bound + sum);
@@ -508,7 +509,7 @@ export function selectTier(input: SelectTierInput): TierSelection {
   }
 
   if (load >= HIGH_LOAD && tier !== 'AFFINE') {
-    tier = QUALITY_TIER_ORDER[Math.max(0, tierRank(tier) - 1)];
+    tier = QUALITY_TIER_ORDER[Math.max(0, tierRank(tier) - 1)] ?? 'AFFINE';
     reason += '; load ' + load + ' >= ' + HIGH_LOAD + ' downgrade -> ' + tier;
   }
 
@@ -579,15 +580,15 @@ function exactValueAggregate(
   V: readonly (readonly number[])[],
 ): number[][] {
   const M = A.length;
-  const dv = V.length > 0 ? V[0].length : 0;
+  const dv = V[0]?.length ?? 0;
   const out = new Array<number[]>(M);
   for (let i = 0; i < M; i++) {
-    const row = A[i];
+    const row = A[i] ?? [];
     const o = new Array<number>(dv).fill(0);
     for (let j = 0; j < row.length; j++) {
-      const a = row[j];
-      const vj = V[j];
-      for (let g = 0; g < dv; g++) o[g] += a * vj[g];
+      const a = row[j] ?? 0;
+      const vj = V[j] ?? [];
+      for (let g = 0; g < dv; g++) o[g] = (o[g] ?? 0) + a * (vj[g] ?? 0);
     }
     out[i] = o;
   }
@@ -615,33 +616,33 @@ export function linearSufficientStatistic(
 ): LinearStatisticResult {
   const M = queryFeatures.length;
   const N = keyFeatures.length;
-  const dF = keyFeatures.length > 0 ? keyFeatures[0].length : 0;
-  const dv = values.length > 0 ? values[0].length : 0;
+  const dF = keyFeatures[0]?.length ?? 0;
+  const dv = values[0]?.length ?? 0;
   const r = rank === undefined ? dF : Math.max(1, Math.min(Math.floor(rank), dF));
 
   const S: bigint[][] = [];
   for (let a = 0; a < r; a++) S.push(new Array<bigint>(dv).fill(0n));
   for (let j = 0; j < N; j++) {
-    const kf = keyFeatures[j];
-    const vj = values[j];
+    const kf = keyFeatures[j] ?? [];
+    const vj = values[j] ?? [];
     for (let a = 0; a < r; a++) {
-      const ka = kf[a];
+      const ka = kf[a] ?? 0n;
       if (ka === 0n) continue;
-      const Sa = S[a];
-      for (let g = 0; g < dv; g++) Sa[g] += ka * vj[g];
+      const Sa = S[a] ?? [];
+      for (let g = 0; g < dv; g++) Sa[g] = (Sa[g] ?? 0n) + ka * (vj[g] ?? 0n);
     }
   }
 
   const outputExact = new Array<bigint[]>(M);
   const output = new Array<number[]>(M);
   for (let i = 0; i < M; i++) {
-    const qf = queryFeatures[i];
+    const qf = queryFeatures[i] ?? [];
     const row = new Array<bigint>(dv).fill(0n);
     for (let a = 0; a < r; a++) {
-      const qa = qf[a];
+      const qa = qf[a] ?? 0n;
       if (qa === 0n) continue;
-      const Sa = S[a];
-      for (let g = 0; g < dv; g++) row[g] += qa * Sa[g];
+      const Sa = S[a] ?? [];
+      for (let g = 0; g < dv; g++) row[g] = (row[g] ?? 0n) + qa * (Sa[g] ?? 0n);
     }
     outputExact[i] = row;
     output[i] = row.map((x) => Number(x));
@@ -687,7 +688,7 @@ export function valueAggregate(
   const mode = inferValueMode(opts);
   const M = A.length;
   const N = V.length;
-  const dv = V.length > 0 ? V[0].length : 0;
+  const dv = V[0]?.length ?? 0;
 
   if (mode === 'EXACT') {
     return {
@@ -710,20 +711,21 @@ export function valueAggregate(
     }
     const Vsum = new Array<number>(dv).fill(0);
     for (let j = 0; j < N; j++) {
-      const vj = V[j];
-      for (let g = 0; g < dv; g++) Vsum[g] += vj[g];
+      const vj = V[j] ?? [];
+      for (let g = 0; g < dv; g++) Vsum[g] = (Vsum[g] ?? 0) + (vj[g] ?? 0);
     }
     const Vbar = Vsum.map((x) => x / N);
 
     const out = new Array<number[]>(M);
     let cost = N * dv;
     for (let i = 0; i < M; i++) {
-      const row = A[i];
+      const row = A[i] ?? [];
       let jstar = 0;
       let best = -Infinity;
       for (let j = 0; j < N; j++) {
-        if (row[j] > best) {
-          best = row[j];
+        const rj = row[j] ?? 0;
+        if (rj > best) {
+          best = rj;
           jstar = j;
         }
       }
@@ -732,13 +734,13 @@ export function valueAggregate(
       const o = new Array<number>(dv).fill(0);
       let mL = 0;
       for (let j = b0; j < b1; j++) {
-        const a = row[j];
+        const a = row[j] ?? 0;
         mL += a;
-        const vj = V[j];
-        for (let g = 0; g < dv; g++) o[g] += a * vj[g];
+        const vj = V[j] ?? [];
+        for (let g = 0; g < dv; g++) o[g] = (o[g] ?? 0) + a * (vj[g] ?? 0);
       }
       const mT = 1 - mL;
-      for (let g = 0; g < dv; g++) o[g] += mT * Vbar[g];
+      for (let g = 0; g < dv; g++) o[g] = (o[g] ?? 0) + mT * (Vbar[g] ?? 0);
       out[i] = o;
       cost += N + (b1 - b0) * dv + dv;
     }
@@ -756,17 +758,17 @@ export function valueAggregate(
     const out = new Array<number[]>(M);
     let cost = 0;
     for (let i = 0; i < M; i++) {
-      const row = A[i];
-      const order = Array.from({ length: N }, (_, j) => j).sort((a, b) => row[b] - row[a]);
+      const row = A[i] ?? [];
+      const order = Array.from({ length: N }, (_, j) => j).sort((a, b) => (row[b] ?? 0) - (row[a] ?? 0));
       const kept = order.slice(0, k);
       let z = 0;
-      for (let t = 0; t < kept.length; t++) z += row[kept[t]];
+      for (let t = 0; t < kept.length; t++) z += row[kept[t] ?? 0] ?? 0;
       const o = new Array<number>(dv).fill(0);
       for (let t = 0; t < kept.length; t++) {
-        const j = kept[t];
-        const w = row[j] / z;
-        const vj = V[j];
-        for (let g = 0; g < dv; g++) o[g] += w * vj[g];
+        const j = kept[t] ?? 0;
+        const w = (row[j] ?? 0) / z;
+        const vj = V[j] ?? [];
+        for (let g = 0; g < dv; g++) o[g] = (o[g] ?? 0) + w * (vj[g] ?? 0);
       }
       out[i] = o;
       cost += N + k * dv;
@@ -884,9 +886,11 @@ function meanKL(P: readonly (readonly number[])[], Q: readonly (readonly number[
   let total = 0;
   for (let i = 0; i < P.length; i++) {
     let row = 0;
-    for (let j = 0; j < P[i].length; j++) {
-      const p = P[i][j];
-      if (p > 0) row += p * Math.log(p / Math.max(Q[i][j], KL_EPS));
+    const Pi = P[i] ?? [];
+    const Qi = Q[i] ?? [];
+    for (let j = 0; j < Pi.length; j++) {
+      const p = Pi[j] ?? 0;
+      if (p > 0) row += p * Math.log(p / Math.max(Qi[j] ?? KL_EPS, KL_EPS));
     }
     total += row;
   }
@@ -895,7 +899,7 @@ function meanKL(P: readonly (readonly number[])[], Q: readonly (readonly number[
 
 function meanTargetMass(W: readonly (readonly number[])[], targets: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < W.length; i++) s += W[i][targets[i]];
+  for (let i = 0; i < W.length; i++) s += W[i]?.[targets[i] ?? 0] ?? 0;
   return W.length > 0 ? s / W.length : 0;
 }
 
@@ -904,17 +908,17 @@ function recallValue(
   V: readonly (readonly number[])[],
   outputs: readonly (readonly number[])[],
 ): number {
-  const dv = V.length > 0 ? V[0].length : 0;
+  const dv = V[0]?.length ?? 0;
   let hits = 0;
   for (let i = 0; i < outputs.length; i++) {
-    const o = outputs[i];
+    const o = outputs[i] ?? [];
     let bd = Infinity;
     let bi = -1;
     for (let m = 0; m < V.length; m++) {
       let dist = 0;
-      const vm = V[m];
+      const vm = V[m] ?? [];
       for (let g = 0; g < dv; g++) {
-        const diff = o[g] - vm[g];
+        const diff = (o[g] ?? 0) - (vm[g] ?? 0);
         dist += diff * diff;
       }
       if (dist < bd) {
@@ -930,22 +934,24 @@ function recallValue(
 function doubling(n: number): number[] {
   const out: number[] = [];
   for (let b = 1; b <= n; b *= 2) out.push(b);
-  if (out[out.length - 1] !== n) out.push(n);
+  if ((out[out.length - 1] ?? n) !== n) out.push(n);
   return out;
 }
 
 /** Effective weights for the CHUNKED approximation (for KL / target mass). */
 function chunkedWeights(A: readonly (readonly number[])[], B: number): number[][] {
-  const N = A[0].length;
+  const first = A[0];
+  if (first === undefined) return [];
+  const N = first.length;
   if (B >= N) return A.map((row) => row.slice());
   const out: number[][] = [];
   for (let i = 0; i < A.length; i++) {
-    const row = A[i];
+    const row = A[i] ?? [];
     let jstar = 0;
     let best = -Infinity;
     for (let j = 0; j < N; j++) {
-      if (row[j] > best) {
-        best = row[j];
+      if ((row[j] ?? 0) > best) {
+        best = row[j] ?? 0;
         jstar = j;
       }
     }
@@ -954,8 +960,8 @@ function chunkedWeights(A: readonly (readonly number[])[], B: number): number[][
     const w = new Array<number>(N).fill(0);
     let mL = 0;
     for (let j = b0; j < b1; j++) {
-      w[j] = row[j];
-      mL += row[j];
+      w[j] = row[j] ?? 0;
+      mL += row[j] ?? 0;
     }
     const tail = (1 - mL) / (N - (b1 - b0));
     for (let j = 0; j < N; j++) if (j < b0 || j >= b1) w[j] = tail;
@@ -966,15 +972,17 @@ function chunkedWeights(A: readonly (readonly number[])[], B: number): number[][
 
 /** Effective weights for the top-k approximation. */
 function topkWeights(A: readonly (readonly number[])[], k: number): number[][] {
-  const N = A[0].length;
+  const first = A[0];
+  if (first === undefined) throw new RangeError('topkWeights needs at least one row');
+  const N = first.length;
   const out: number[][] = [];
   for (let i = 0; i < A.length; i++) {
-    const row = A[i];
-    const order = Array.from({ length: N }, (_, j) => j).sort((a, b) => row[b] - row[a]).slice(0, k);
+    const row = A[i] ?? [];
+    const order = Array.from({ length: N }, (_, j) => j).sort((a, b) => (row[b] ?? 0) - (row[a] ?? 0)).slice(0, k);
     let z = 0;
-    for (let t = 0; t < order.length; t++) z += row[order[t]];
+    for (let t = 0; t < order.length; t++) z += row[order[t] ?? 0] ?? 0;
     const w = new Array<number>(N).fill(0);
-    for (let t = 0; t < order.length; t++) w[order[t]] = row[order[t]] / z;
+    for (let t = 0; t < order.length; t++) { const idx = order[t] ?? 0; w[idx] = (row[idx] ?? 0) / z; }
     out.push(w);
   }
   return out;
@@ -987,18 +995,18 @@ function affineKernelWeights(
 ): number[][] {
   const out: number[][] = [];
   for (let i = 0; i < queries.length; i++) {
-    const q = queries[i];
+    const q = queries[i] ?? [];
     const w = new Array<number>(keys.length);
     let z = 0;
     for (let j = 0; j < keys.length; j++) {
-      const k = keys[j];
+      const k = keys[j] ?? [];
       let dot = 0;
-      for (let f = 0; f < q.length; f++) dot += q[f] * k[f];
+      for (let f = 0; f < q.length; f++) dot += (q[f] ?? 0) * (k[f] ?? 0);
       const x = 1 + dot;
       w[j] = x;
       z += x;
     }
-    for (let j = 0; j < keys.length; j++) w[j] = w[j] / z;
+    for (let j = 0; j < keys.length; j++) w[j] = (w[j] ?? 0) / z;
     out.push(w);
   }
   return out;
@@ -1013,10 +1021,12 @@ export function paretoFrontier(points: readonly ParetoPoint[]): ParetoPoint[] {
   const kept: ParetoPoint[] = [];
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
+    if (p === undefined) continue;
     let dominated = false;
     for (let j = 0; j < points.length; j++) {
       if (i === j) continue;
       const q = points[j];
+      if (q === undefined) continue;
       const betterCost = q.cost <= p.cost;
       const betterQuality = q.quality >= p.quality;
       const strict = q.cost < p.cost || q.quality > p.quality;
@@ -1058,10 +1068,10 @@ export function paretoSweep(opts: ParetoSweepOptions = {}): ParetoSweepReport {
   const queries: number[][] = [];
   for (let i = 0; i < M; i++) {
     const t = i % N;
-    const q = keys[t].slice();
+    const q = (keys[t] ?? []).slice();
     for (let f = 0; f < flips; f++) {
       const bit = Math.floor(rng() * d);
-      q[bit] = q[bit] ^ 1;
+      q[bit] = (q[bit] ?? 0) ^ 1;
     }
     targets.push(t);
     queries.push(q);
@@ -1100,8 +1110,7 @@ export function paretoSweep(opts: ParetoSweepOptions = {}): ParetoSweepReport {
   });
 
   const blockSizes = (opts.blockSizes ?? doubling(N)).filter((b) => b < N);
-  for (let bi = 0; bi < blockSizes.length; bi++) {
-    const B = blockSizes[bi];
+  for (const B of blockSizes) {
     const res = valueAggregate(A, V, { blockSize: B });
     const w = chunkedWeights(A, B);
     const kl = meanKL(A, w);
@@ -1120,8 +1129,7 @@ export function paretoSweep(opts: ParetoSweepOptions = {}): ParetoSweepReport {
   }
 
   const topKs = opts.topKs ?? doubling(N);
-  for (let ki = 0; ki < topKs.length; ki++) {
-    const k = topKs[ki];
+  for (const k of topKs) {
     const res = valueAggregate(A, V, { topK: k });
     const w = topkWeights(A, k);
     const kl = meanKL(A, w);
@@ -1141,8 +1149,7 @@ export function paretoSweep(opts: ParetoSweepOptions = {}): ParetoSweepReport {
 
   const ranks = opts.ranks ?? [1, 2, 4, d + 1];
   const affineW = affineKernelWeights(queries, keys);
-  for (let ri = 0; ri < ranks.length; ri++) {
-    const r = ranks[ri];
+  for (const r of ranks) {
     const res = linearSufficientStatistic(qF, kF, Vbig, r);
     const kl = meanKL(A, affineW);
     points.push({
@@ -1161,14 +1168,16 @@ export function paretoSweep(opts: ParetoSweepOptions = {}): ParetoSweepReport {
 
   const frontier = paretoFrontier(points);
   const linearPoints = points.filter((p) => p.mode === 'LINEAR').sort((a, b) => a.cost - b.cost);
-  const linear = linearPoints.length > 0 ? linearPoints[0] : points[points.length - 1];
+  const linear = linearPoints[0] ?? points[points.length - 1];
+  if (linear === undefined) throw new RangeError('paretoSweep produced no linear point');
   const exact = points[0];
+  if (exact === undefined) throw new RangeError('paretoSweep produced no points');
   const nearExact = frontier.filter((p) => p.quality >= exact.quality - 0.02);
   const knee =
     nearExact.length > 0
       ? nearExact.reduce((a, b) => (a.cost <= b.cost ? a : b))
       : frontier.length > 0
-        ? frontier[0]
+        ? (frontier[0] ?? null)
         : null;
 
   return {
@@ -1256,7 +1265,7 @@ export function collapseRange(
   let maxWeight = 0;
   let floorOk = true;
   for (let i = 0; i < weights.length; i++) {
-    const w = weights[i];
+    const w = weights[i] ?? 0;
     if (!Number.isInteger(w) || w < 0) {
       throw new TypeError('weights must be non-negative integers');
     }
@@ -1269,7 +1278,7 @@ export function collapseRange(
   if (!Number.isInteger(r) || r < 0) throw new TypeError('budget must be a non-negative integer');
   let width = 0;
   for (let t = 0; t < target.length; t++) {
-    const idx = target[t];
+    const idx = target[t] ?? -1;
     if (!Number.isInteger(idx) || idx < 0 || idx >= weights.length) {
       throw new RangeError('target index out of range');
     }
@@ -1306,9 +1315,9 @@ export function effectiveCost(
 function normalizeRows(rows: readonly (readonly number[])[]): number[][] {
   const out: number[][] = [];
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
+    const row = rows[i] ?? [];
     let z = 0;
-    for (let j = 0; j < row.length; j++) z += row[j];
+    for (let j = 0; j < row.length; j++) z += row[j] ?? 0;
     out.push(row.map((x) => (z !== 0 ? x / z : 1 / row.length)));
   }
   return out;
@@ -1360,10 +1369,12 @@ function missNotLieFrontier(points: readonly MissNotLiePoint[]): MissNotLiePoint
   const kept: MissNotLiePoint[] = [];
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
+    if (p === undefined) continue;
     let dominated = false;
     for (let j = 0; j < points.length; j++) {
       if (i === j) continue;
       const q = points[j];
+      if (q === undefined) continue;
       const better =
         q.effectiveCost <= p.effectiveCost &&
         q.lieRate <= p.lieRate &&
@@ -1410,10 +1421,10 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
   const queries: number[][] = [];
   for (let i = 0; i < M; i++) {
     const t = i % N;
-    const q = keys[t].slice();
+    const q = (keys[t] ?? []).slice();
     for (let f = 0; f < flips; f++) {
       const bit = Math.floor(rng() * d);
-      q[bit] = q[bit] ^ 1;
+      q[bit] = (q[bit] ?? 0) ^ 1;
     }
     targets.push(t);
     queries.push(q);
@@ -1449,8 +1460,7 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
 
   const jobs: Job[] = [];
   const blockSizes = (opts.blockSizes ?? doubling(N)).filter((b) => b < N);
-  for (let bi = 0; bi < blockSizes.length; bi++) {
-    const B = blockSizes[bi];
+  for (const B of blockSizes) {
     const res = valueAggregate(A, V, { blockSize: B });
     jobs.push({
       label: 'CHUNKED B=' + B,
@@ -1464,8 +1474,7 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
     });
   }
   const topKs = opts.topKs ?? doubling(N);
-  for (let ki = 0; ki < topKs.length; ki++) {
-    const k = topKs[ki];
+  for (const k of topKs) {
     const res = valueAggregate(A, V, { topK: k });
     jobs.push({
       label: 'TOPK k=' + k,
@@ -1479,8 +1488,7 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
     });
   }
   const ranks = opts.ranks ?? [1, 2, 4, d + 1];
-  for (let ri = 0; ri < ranks.length; ri++) {
-    const r = ranks[ri];
+  for (const r of ranks) {
     const res = linearSufficientStatistic(qF, kF, Vbig, r);
     jobs.push({
       label: 'LINEAR rank=' + r,
@@ -1499,9 +1507,10 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
   const affineIntW: number[][] = [];
   for (let i = 0; i < M; i++) {
     const row = scores[i];
+    if (row === undefined) throw new RangeError('scores row missing');
     const w = new Array<number>(N);
     for (let j = 0; j < N; j++) {
-      const v = d - row[j];
+      const v = d - (row[j] ?? 0);
       w[j] = d - Math.min(v, d) + 1;
     }
     affineIntW.push(w);
@@ -1519,28 +1528,31 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
   });
 
   const points: MissNotLiePoint[] = [];
-  for (let ji = 0; ji < jobs.length; ji++) {
-    const job = jobs[ji];
-    for (let ti = 0; ti < taus.length; ti++) {
-      const tau = taus[ti];
+  for (const job of jobs) {
+    for (const tau of taus) {
       let admitted = 0;
       let missed = 0;
       let lies = 0;
       for (let i = 0; i < M; i++) {
         const t = targets[i];
-        const mExact = A[i][t];
+        if (t === undefined) continue;
+        const Ai = A[i];
+        if (Ai === undefined) continue;
+        const mExact = Ai[t] ?? 0;
         const band: ToleranceBand = { low: mExact - bandTol, high: mExact + bandTol };
         let interval: { low: number; high: number; sound: boolean };
         if (job.interval === 'collapse' && job.intWeights) {
-          interval = collapseRange(job.intWeights[i], [t], d);
+          const row = job.intWeights[i];
+          if (row === undefined) continue;
+          interval = collapseRange(row, [t], d);
         } else {
-          const mCheap = job.weights[i][t];
+          const mCheap = job.weights[i]?.[t] ?? 0;
           interval = { low: mCheap, high: mCheap, sound: true };
         }
         const decision = missNotLieAdmit({ interval, band, tau });
         if (decision === 'admit') {
           admitted += 1;
-          const mCheap = job.weights[i][t];
+          const mCheap = job.weights[i]?.[t] ?? 0;
           if (Math.abs(mCheap - mExact) > bandTol) lies += 1;
         } else {
           missed += 1;
@@ -1575,7 +1587,7 @@ export function missNotLieSweep(opts: MissNotLieSweepOptions = {}): MissNotLieSw
       ? zeroLie.reduce((a, b) => (a.effectiveCost <= b.effectiveCost ? a : b))
       : null;
   let maxLieRate = 0;
-  for (let i = 0; i < points.length; i++) if (points[i].lieRate > maxLieRate) maxLieRate = points[i].lieRate;
+  for (const p of points) if (p.lieRate > maxLieRate) maxLieRate = p.lieRate;
 
   return {
     points,
