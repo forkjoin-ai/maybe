@@ -1,0 +1,54 @@
+// tensor-bayes-55.gg -- the 55-axis hyper-joint over the God Formula
+//
+// The Buleyean distribution is the 2-perspective face of one finite object.
+// This topology reads the same object across 55 axes: one joint mass, one
+// consensus law per ordered pair, a residual void that never collapses.
+//
+//   P_i(J | Face_j) * M(Face_j) = P_j(J | Face_i) * M(Face_i)
+//
+// Lean anchors: Gnosis.TensorBayes.tensor_bayes, face_mul_void,
+// buleyean_floor_never_zero, plucker_rank_one, plucker_alternating.
+
+// -- Inputs ---------------------------------------------------------
+
+(void_boundary:Input { value: "[]", description: "per-axis rejection counts" })
+(total_entries:Input { value: "0", description: "R = shared observation budget" })
+(signal:Input { value: "[]", description: "boolean articulation mask over 55 axes" })
+
+// -- The God Formula per axis ---------------------------------------
+
+(axis_weights:Logic { op: "godWeight", formula: "w_i = R - min(v_i, R) + 1" })
+(total_entries)-[:PROCESS { role: "budget-source" }]->(axis_weights)
+(void_boundary)-[:PROCESS { role: "rejection-source" }]->(axis_weights)
+
+// -- The hyper-joint and the consensus law --------------------------
+
+(hyper_joint:Logic { op: "rank_one_joint", formula: "J_ij = w_i * w_j" })
+(consensus:Logic { op: "consensus", invariant: "cond_i_j * M_j = cond_j_i * M_i" })
+(axis_weights)-[:PROCESS]->(hyper_joint)
+(hyper_joint)-[:PROCESS]->(consensus)
+
+// -- Face / void conservation ---------------------------------------
+
+(face:Logic { op: "faceVolume", description: "product over articulated axes" })
+(void_:Logic { op: "voidVolume", description: "product over residual axes" })
+(conservation:Logic { op: "assert_product", invariant: "face * void = total" })
+(signal)-[:PROCESS { role: "articulation-mask" }]->(face)
+(signal)-[:PROCESS { role: "articulation-mask" }]->(void_)
+(axis_weights)-[:PROCESS]->(face)
+(axis_weights)-[:PROCESS]->(void_)
+(face)-[:PROCESS]->(conservation)
+(void_)-[:PROCESS]->(conservation)
+
+// -- Never-collapse floor -------------------------------------------
+
+(floor:Logic { op: "assert_all_positive", invariant: "w_i >= 1 and void >= 1" })
+(conservation)-[:PROCESS]->(floor)
+
+// -- Pleroma counting -----------------------------------------------
+
+(pleroma:Logic { op: "pairwise", value: 55, description: "C(11,2) = triangular(10) = fib(10)" })
+(channels:Logic { op: "pairwise", value: 1485, description: "C(55,2) = 495 adjacent + 990 disjoint" })
+(pleroma)-[:PROCESS]->(channels)
+(floor)-[:MEASURE { reason: "never-collapse" }]->(result:Result { kind: "ok" })
+(channels)-[:MEASURE { reason: "channel-block-split" }]->(result)

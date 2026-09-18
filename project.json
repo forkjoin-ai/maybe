@@ -54,6 +54,288 @@
         }
       }
     },
+    "test:tensor-bayes": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/tensor-bayes-55.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the 55-axis hyper-joint invariants: floor, face/void conservation, consensus symmetry, pleroma counting.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/tensor-bayes-55.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:speculative-acceptance": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/speculative-acceptance.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the speculative-decoding acceptance posterior: exact add-one numerator/denominator pairs, descending head ranking, uniform 1/K at A=0, the never-zero floor, target-mass draft/block length monotonicity, and the block-position profile.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/speculative-acceptance.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:speculative-acceptance": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/speculative-acceptance.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the speculative-decoding acceptance posterior library file (exact BigInt posterior, length policy, and block profile).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/speculative-acceptance.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:void-crdt": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/void-crdt.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the conflict-free replicated posterior: count/addition merge laws, the idempotent identity-carrying replica join, order-independent convergence, exact BigInt numerator/denominator pairs, and the urn/Laplace identity after arbitrary merges.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/void-crdt.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:void-crdt": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/void-crdt.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the conflict-free replicated posterior library file (exact BigInt posterior and identity-carrying replica join).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/void-crdt.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:urn": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/urn.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the urn/Laplace identity: exact integer weights, uniform N=0 posterior, and Buleyean = Laplace normalization.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/urn.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:urn": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/urn.ts src/tensor-bayes-55.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the urn and 55D library files (including the collapse surface) without the test harness types.",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/urn.ts",
+              "src/tensor-bayes-55.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:finance": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/finance",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the exact finance decision/risk primitives: the add-one expectation sandwich, the never-zero tail and the MLE dual, exact Kelly sizing and its small-sample overbet dual, the newsvendor critical fractile and mean-order dual, execution-venue ranking with the never-collapse floor and the proven collapse range, and the consensus no-arbitrage checker with its mass-blind dual.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/finance"
+            ]
+          }
+        }
+      }
+    },
+    "test:quality-ladder": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/quality-ladder.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the dynamic precision ladder: the sealed exp table reproduces Math.exp, the table softmax makes zero Math.exp calls, tier selection mirrors the Hope Jar budgets, the value-side block/rank/topK slider is Pareto-monotone, and the tau miss-not-lie admission keeps lieRate at zero while spending misses.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/quality-ladder.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:finance": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/finance/rational.ts src/finance/risk.ts src/finance/kelly.ts src/finance/newsvendor.ts src/finance/execution-router.ts src/finance/arbitrage.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the exact finance library files (BigInt rational arithmetic and the five decision/risk modules).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/finance/rational.ts",
+              "src/finance/risk.ts",
+              "src/finance/kelly.ts",
+              "src/finance/newsvendor.ts",
+              "src/finance/execution-router.ts",
+              "src/finance/arbitrage.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:backtest": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/finance/backtest.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the deterministic bet-sizing backtest: seeded xorshift32 market generation and regime switching, the five sizing rules, terminal log-wealth/ruin/drawdown/overbet metrics, the undershoot-vs-save-capital adversarial dual, ruin ordering, conservative range Kelly never exceeding true Kelly, growth monotonicity in p*, and same-seed reproducibility.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/finance/backtest.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:backtest": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/finance/backtest.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the deterministic bet-sizing backtest library (exact-rational sizing, seeded market generator, metrics, and adversarial dual).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/finance/backtest.ts"
+            ]
+          }
+        }
+      }
+    },
     "typecheck": {
       "executor": "a0:run-commands",
       "dependsOn": [

@@ -50,6 +50,122 @@ export {
   klDivergence,
 } from './buleyean.js';
 
+// The 55-axis hyper-joint over the God Formula (Gnosis.TensorBayes).
+export {
+  PLEROMA,
+  KENOMA,
+  godWeight,
+  floorWeight,
+  pairwise,
+  triangular,
+  choose4,
+  fib,
+  countTrue,
+  articulationDeficit,
+  faceVolume,
+  voidVolume,
+  totalVolume,
+  structuralReport,
+  consensusEntry,
+  consensusMatrix,
+  consensusIsSymmetric,
+  fieldWeights,
+  skyRmsPeak,
+  peakIsMaxWeight,
+  channelBlocks,
+  pleromaIdentities,
+  collapse,
+  type FloorHypothesis,
+  type Signal,
+  type StructuralReport,
+  type KenomaField,
+  type ChannelBlocks,
+  type PleromaIdentities,
+  type CollapseInput,
+  type CollapseResult,
+} from './tensor-bayes-55.js';
+
+// The classic urn read through the God Formula. The clamped weight
+// N - min(v_i, N) + 1 collapses onto counts[i] + 1, so normalizing the
+// Buleyean weights reproduces the Laplace posterior exactly.
+export {
+  urnTotal,
+  urnRejections,
+  buleyeanWeightFromUrn,
+  laplacePosterior,
+  buleyeanPosteriorFromUrn,
+  empiricalFrequency,
+  assertUrnLaplaceIdentity,
+  type Urn,
+  type UrnLaplaceIdentity,
+} from './urn.js';
+
+// The conflict-free replicated posterior. The raw count-vector merge
+// (mergeCounts) is componentwise addition -- commutative and associative, but
+// not idempotent. The identity-carrying replica join (mergeReplicas, exported
+// as `merge`) is commutative, associative, AND idempotent: duplicate delta ids
+// are absorbed. The exact posterior is integer numerator/denominator pairs with
+// the urn/Laplace identity checked in BigInt.
+export {
+  MAX_SAFE_COUNT,
+  coerceCounts,
+  mergeBigCounts,
+  mergeCounts,
+  evidenceTotal,
+  exactPosterior,
+  posteriorPairs,
+  posterior,
+  assertLaplaceIdentity,
+  createReplica,
+  delta,
+  applyDelta,
+  mergeReplicas,
+  merge,
+  mergeAll,
+  replicaFromDeltas,
+  replicaPosterior,
+  probe,
+  hasObserved,
+  type CountVector,
+  type BigCountVector,
+  type Counts,
+  type PosteriorTerm,
+  type ExactPosterior,
+  type LaplaceIdentity,
+  type DeltaId,
+  type Delta,
+  type Replica,
+} from './void-crdt.js';
+
+// Speculative-decoding acceptance posterior. A drafter proposes candidates and
+// the target accepts/rejects them; with acceptance counts a_i over K candidates
+// the add-one posterior is (a_i + 1) / (A + K), A = sum a_i. Exact integer pairs
+// with display floats, descending head ranking, a bounded target-mass draft
+// length policy, the block-position profile, and the never-zero floor. The
+// canonical assertLaplaceIdentity name is already exported by void-crdt.ts, so
+// this module's identical integer check is re-exported as
+// assertAcceptanceLaplaceIdentity.
+export {
+  acceptancePosterior,
+  rankDraftHeads,
+  draftLengthPolicy,
+  expectedAcceptance,
+  blockAcceptanceProfile,
+  recommendedBlockLength,
+  assertLaplaceIdentity as assertAcceptanceLaplaceIdentity,
+  ACCEPTANCE_FLOOR,
+  type AcceptanceCounts,
+  type AcceptanceTerm,
+  type AcceptancePosterior,
+  type RankedDraftHead,
+  type LengthPolicyOptions,
+  type LengthPolicyResult,
+  type ExpectedAcceptance,
+  type BlockPositionTerm,
+  type BlockAcceptanceProfile,
+  type AcceptanceLaplaceIdentity,
+} from './speculative-acceptance.js';
+
 export {
   selectProbabilityRoutes,
   type ProbabilityRouteDecision,
@@ -453,3 +569,197 @@ export {
   type IndistinguishablePair,
   type InertFeature,
 } from './audibility.js';
+
+// ===========================================================================
+// Finance decision/risk primitives (src/finance/)
+// ===========================================================================
+//
+// Exact rational arithmetic and five decision/risk modules built on the
+// add-one (Laplace/Buleyean) posterior. Every probability is a BigInt
+// numerator/denominator pair; floats are display-only. These are arithmetic
+// primitives, NOT financial advice, and no profitability or alpha is claimed.
+//
+// Every protection ships an adversarial dual that names its failure mode:
+//   risk.ts              MLE prices an unobserved catastrophe at 0
+//   kelly.ts             MLE overbets on a small sample
+//   newsvendor.ts        ordering the mean is suboptimal when cu != co
+//   execution-router.ts  MLE abandons a correctly-rejected venue forever
+//   arbitrage.ts         a mass-blind checker misses a real inconsistency
+
+// Exact BigInt rational arithmetic shared by the finance primitives.
+export {
+  gcd,
+  exactFraction,
+  fractionFromNumber,
+  toFraction,
+  compareFractions,
+  addFractions,
+  subFractions,
+  mulFractions,
+  divFractions,
+  isZeroFraction,
+  isPositiveFraction,
+  isNegativeFraction,
+  fractionToNumber,
+  fractionToString,
+  clampFraction,
+  type ExactFraction,
+  type RationalInput,
+} from './finance/rational.js';
+
+// Exact expectation and the never-zero tail.
+export {
+  coerceLosses,
+  exactExpectation,
+  assertLossSandwich,
+  neverZeroTail,
+  mlePosterior,
+  tailAdversarialDual,
+  tailMassBound,
+  type LossVector,
+  type LossContribution,
+  type ExactExpectation,
+  type LossSandwichReport,
+  type NeverZeroTailReport,
+  type MlePosterior,
+  type TailAdversarialDual,
+  type TailMassBound,
+} from './finance/risk.js';
+
+// Bet sizing on the exact posterior, with the conservative range variant.
+export {
+  kellyFraction,
+  kellyDecision,
+  buleyeanKelly,
+  mleKelly,
+  fractionalKellyFromRange,
+  robustKellyFromRange,
+  kellyRangeFromPosterior,
+  kellyAdversarialDual,
+  type OddsInput,
+  type KellyDecision,
+  type BuleyeanKellyDecision,
+  type FractionalKellyFromRange,
+  type KellyRangeReport,
+  type KellyAdversarialDual,
+} from './finance/kelly.js';
+
+// Critical fractile and the discrete order quantity.
+export {
+  coerceDemands,
+  criticalFractile,
+  newsvendorOrder,
+  newsvendorCost,
+  posteriorMeanDemand,
+  meanOrderDemand,
+  newsvendorMeanDual,
+  robustNewsvendorOrder,
+  type DemandVector,
+  type NewsvendorRung,
+  type NewsvendorOrder,
+  type NewsvendorCost,
+  type NewsvendorMeanDual,
+  type RobustOrderEndpoint,
+  type RobustNewsvendorOrder,
+} from './finance/newsvendor.js';
+
+// Execution-venue ranking by rejection counts. The names godWeight,
+// skyRmsPeak, peakIsMaxWeight and assertLaplaceIdentity already exist in the
+// package (tensor-bayes-55.ts and void-crdt.ts), so the router's identical
+// surfaces are re-exported under venue/routing-qualified aliases.
+export {
+  DEFAULT_REJECTION_WEIGHTS,
+  rejectionTotal,
+  executionField,
+  godWeight as venueGodWeight,
+  laplaceCounts,
+  venueWeights,
+  venuePosterior,
+  skyRmsPeak as venueSkyRmsPeak,
+  peakIsMaxWeight as venuePeakIsMaxWeight,
+  assertFloor,
+  assertLaplaceIdentity as assertRoutingLaplaceIdentity,
+  collapseRange,
+  rankVenues,
+  DEFAULT_SELECT_SEED,
+  seededRng,
+  selectVenue,
+  routingAdversarialDual,
+  type RejectionCounts,
+  type RejectionWeights,
+  type ExecutionVenue,
+  type ExecutionField,
+  type VenuePosterior,
+  type ExecutionPosterior,
+  type FloorReport,
+  type RoutingLaplaceIdentity,
+  type CollapseRangeReport,
+  type RankedVenue,
+  type RoutingAdversarialDual,
+} from './finance/execution-router.js';
+
+// The consensus law as a finite no-arbitrage checker.
+export {
+  asRationalMatrix,
+  asMassVector,
+  consensusResidual,
+  findsArbitrage,
+  twoVenueArbitrage,
+  directedJointMatrix,
+  antisymmetricResidualMatrix,
+  directedJointIsSymmetric,
+  directionBlindFindsArbitrage,
+  arbitrageAdversarialDual,
+  type MatrixEntry,
+  type RationalMatrix,
+  type MassVector,
+  type ArbitrageWitness,
+  type ArbitrageReport,
+  type DirectionBlindDual,
+} from './finance/arbitrage.js';
+
+// The deterministic bet-sizing backtest: a seeded market generator, five
+// sizing rules, and the honest adversarial dual for FINANCE.md item 3
+// (undershoot growth vs. save capital). No profitability is claimed.
+export {
+  xorshift32,
+  staticMarket,
+  switchingMarket,
+  trueProbabilityAt,
+  generateOutcomes,
+  trueKellyFraction,
+  recommendedTrueKelly,
+  expectedLogGrowth,
+  kellyGrowthRate,
+  mleKellyStrategy,
+  addOneKellyStrategy,
+  conservativeRangeKellyStrategy,
+  fixedFractionStrategy,
+  noBetStrategy,
+  oracleKellyStrategy,
+  defaultStrategies,
+  runPath,
+  runOutcomeSequence,
+  runBacktest,
+  seedRange,
+  summarizeStrategy,
+  strategyById,
+  growthUndershootCase,
+  capitalSavedCase,
+  backtestAdversarialDual,
+  type RegimeStep,
+  type MarketSpec,
+  type BetContext,
+  type BetStrategy,
+  type PathResult,
+  type StrategyReport,
+  type BacktestReport,
+  type GrowthUndershootReport,
+  type CapitalSavedReport,
+  type BacktestAdversarialDual,
+} from './finance/backtest.js';
+
+// The dynamic precision ladder: score/exp tiers, the value-side slider, and tau miss-not-lie.
+// Re-exported as a namespace because the module exposes ~60 symbols and `collapseRange`
+// collides with the execution-router export.
+export * as qualityLadder from './quality-ladder.js';
