@@ -37,6 +37,49 @@ Source module for the Src feature area.
 - `tensor-bayes-55.test.ts`: Floor, face/void conservation, rotation invariance,
   consensus symmetry, Skyrms peak, the 495+990=1485 block split, and the
   collapse point always inside the floor/cap interval.
+- `tensor-bayes-laplace-gap.ts`: The price of the never-collapse floor. Exact
+  cross-multiplied `bigint` bounds on the gap between the Laplace estimate and
+  the raw frequency: the sharp over/under bounds, the explicit vanishing
+  threshold `N0 = K*q`, exactness at the uniform share `N = K*n`, and the
+  honest adversarial duals (a symmetric sharp claim that is false; the `K>=1`
+  and `n<=N` guards are load-bearing). Mirrors `Gnosis.TensorBayesLaplaceGap`.
+  Check: `a0 run @a0n/maybe:test:laplace-gap`.
+- `tensor-bayes-laplace-gap.test.ts`: Sharp and loose bounds over ranges,
+  exactness biconditional, vanishing-threshold sweep, and the adversarial
+  duals.
+- `tensor-bayes-johnson.ts`: The Johnson scheme J(11,2) on the 55 axes,
+  executed as real 55x55 integer matrix arithmetic. Degrees 18/36, the SRG
+  identity `A*A = 18*I + 9*A + 4*D` and its D-free reduced form, lambda=9/mu=4,
+  the star and quadrilateral spectrum witnesses (eigenvalues 7 and -2) at
+  every one of the 55 axes, and the lower-bound-only eigenvalue multiplicities
+  by explicit diagonal-pairing/evaluation witness. Mirrors
+  `Gnosis.TensorBayesJohnson`. Check: `a0 run @a0n/maybe:test:johnson`.
+- `tensor-bayes-johnson.test.ts`: Edge enumeration, partition matrix, degrees,
+  the SRG identity and its reduced form, the full spectrum at every axis, and
+  the multiplicity lower-bound witnesses (with the consistency-check caveat on
+  `multiplicitySolves`).
+- `tensor-bayes-blackwell.ts`: Garbling cannot help. Bayes risk over integer
+  mass/loss tables, the deterministic `risk_garble` identity and cannot-help
+  inequality, the randomized (common-row-sum, cleared-of-denominators) form,
+  and the headline dual `massBlindRiskSees`: a merge with zero mass loss on
+  every row whose best achievable risk still jumps from 0 to 1. Mirrors
+  `Gnosis.TensorBayesBlackwell` and `Gnosis.TensorBayesBlackwellRatio`. Check:
+  `a0 run @a0n/maybe:test:blackwell`.
+- `tensor-bayes-blackwell.test.ts`: The risk-garble identity, cannot-help
+  inequalities (deterministic and randomized), the mass-blind-risk-sees
+  headline, and the mass-does-not-determine-risk dual.
+- `tensor-bayes-farkas.ts`: Finite Farkas certificates and the infrathin
+  margin. Exact `bigint` certificate structure and soundness by direct
+  weighted-slack contradiction, plus the concrete tight infeasible/feasible
+  pair (margin -1 adjacent to margin 0) and its rational-boundary contrast:
+  the same certificate halved lands strictly inside the gap that is empty
+  over `Int`. Scoped to the certificate definition and the concrete pair-level
+  alternative, not the general n-constraint Fourier-Motzkin elimination.
+  Mirrors `Gnosis.FiniteFarkas` and `Gnosis.FarkasInfrathin`. Check:
+  `a0 run @a0n/maybe:test:farkas`.
+- `tensor-bayes-farkas.test.ts`: Certificate soundness, the tight pair, the
+  integer cover with no interior, the rational-margin-fills-the-gap contrast,
+  and the nonnegativity-load-bearing dual.
 - `urn.ts`: The classic urn read through the God Formula. Rejections are
   `v_i = N - counts[i]`; the clamp `N - min(v_i, N) + 1` collapses onto
   `counts[i] + 1`, so normalizing the Buleyean weights reproduces the Laplace

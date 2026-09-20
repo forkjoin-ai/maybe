@@ -157,6 +157,141 @@ ordered pair, a residual void that never collapses. Mirrors `Gnosis.TensorBayes`
   the honest interval `[width/total, ((budget+1)*width)/total]` with `inRange`
   decided by the exact integer sandwich. Returns a plain-language `sentence`.
 
+### The Laplace gap (`tensor-bayes-laplace-gap.ts`)
+
+The price of the never-collapse floor. Mirrors `Gnosis.TensorBayesLaplaceGap`.
+The exact difference between the Laplace (add-one/Buleyean) estimate and the
+raw frequency is `(n+1)/(N+K) - n/N = (N - K*n) / (N*(N+K))`, and it is
+LOPSIDED: the overestimate is bounded by `1/(N+K)` (sharp at an unseen colour
+`n=0`), the underestimate by `(K-1)/(N+K)` (sharp at a monopoly colour
+`n=N`), and the two coincide exactly iff `N = K*n`. Every function is the
+cross-multiplied `bigint` form the Lean states, never a float division.
+
+- `laplaceOverSharp` / `laplaceUnderSharp` -- the sharp one-sided bounds
+- `laplaceOverLoose` / `laplaceUnderLoose` / `laplaceGapBound` -- the looser
+  `K/(N+K)` bound each direction needs its own guard for
+- `unseenOverExact` / `monopolyUnderExact` -- the sharp bounds are reached
+  with EQUALITY at `n=0` and `n=N`
+- `laplaceExactIff` -- the estimates coincide exactly at the uniform share
+  `N = K*n`
+- `laplaceGapBelowEps` / `laplacePriceVanishes` / `laplaceVanishingThreshold` --
+  the price drops below any rational tolerance `p/q` at the explicit
+  threshold `N0 = K*q`, not a limit
+- `sharpSymmetricClaimHolds`, `gapFailsWithoutColours`,
+  `gapFailsWithoutCountBound`, `exactVacuousAtEmpty` -- the honest adversarial
+  duals: a SYMMETRIC sharp bound is FALSE (witness `K=3,N=1,n=1`), and both
+  the `K>=1` and `n<=N` guards are load-bearing
+
+Checks: `a0 run @a0n/maybe:test:laplace-gap` and
+`a0 run @a0n/maybe:typecheck:laplace-gap`.
+
+### The Johnson scheme J(11,2) (`tensor-bayes-johnson.ts`)
+
+The real combinatorics behind the 55-axis hyper-joint. Mirrors
+`Gnosis.TensorBayesJohnson`: the 55 axes are the edges of `K_11` (11
+walkers), two DISTINCT axes are ADJACENT when they share one walker and
+DISJOINT when they share none, and the resulting graph is strongly regular
+with parameters `(55, 18, 9, 4)`. A 55x55 integer matrix multiply is
+166,375 operations, trivial to actually run -- so every identity below is
+checked by brute-force computation, not asserted.
+
+- `edgeAt` / `edgeIndex` -- the axis <-> walker-pair bijection
+- `adjM` / `disjM` / `delta` / `A` / `D` / `I` / `J` -- the adjacency,
+  disjointness, identity and all-ones matrices, built once
+- `partitionHolds` -- `I + A + D = J` at every one of the 3,025 entries
+- `adjacentDegree` / `disjointDegree` -- 18 adjacent and 36 disjoint
+  neighbours per axis, checked at every axis
+- `adjSqGeneralHolds` -- the SRG identity `A*A = 18*I + 9*A + 4*D`
+- `adjSqReducedHolds` -- the D-free reduced form `A*A = 14*I + 5*A + 4*J`
+  (equivalently `A^2 - 5A - 14I = 4J`)
+- `johnsonLambdaHolds` / `johnsonMuHolds` -- adjacent axes share exactly 9
+  common adjacent neighbours, disjoint axes share exactly 4
+- `starContractHolds` -- `A*star(x) = 7*star(x) + 2*J` for every walker `x`
+- `starDiffEigen7Holds` / `quadEigenNeg2Holds` -- every star difference is a
+  7-eigenvector and every ordered quadrilateral is a (-2)-eigenvector, at
+  every one of the 55 axes
+- `eigen7MultiplicityWitness` / `eigenNeg2MultiplicityWitness` -- explicit
+  LOWER-bound witnesses (>= 10 and >= 36) via diagonal pairing/evaluation,
+  no determinant, no rank theory
+- `multiplicitySolves` -- `(1, 10, 44)` solves the trace/dimension
+  consistency equations. THIS IS A CONSISTENCY CHECK, NOT A PROOF: the
+  matching upper bounds, the exact multiplicities, and completeness of the
+  spectrum `{18, 7, -2}` are not established, in the Lean or here
+- `jointIAViolatesPlucker` -- `I+A` is symmetric but not a rank-one joint,
+  so the corpus's rank-one/star-block results cut something non-vacuous
+
+Checks: `a0 run @a0n/maybe:test:johnson` and
+`a0 run @a0n/maybe:typecheck:johnson`.
+
+### Blackwell: garbling cannot help (`tensor-bayes-blackwell.ts`)
+
+Mirrors `Gnosis.TensorBayesBlackwell` and `Gnosis.TensorBayesBlackwellRatio`.
+An experiment is a joint mass table `P[state][signal]`; the Bayes risk of a
+decision rule under a loss table is exact integer arithmetic. `risk_garble`
+proves garbling (merging signals) can only ever match, never beat, the
+pulled-back rule on the original experiment -- so a Bayes-optimal rule
+already does at least as well as anything reachable after a merge, for both
+deterministic and randomized (common-row-sum, cleared-of-denominators)
+garblings.
+
+- `bayesRisk` / `isBayesOptimal` / `enumerateRules` -- the risk functional
+  and finite-domain optimality check
+- `garble` / `riskGarbleIdentityHolds` / `optimalRiskLeGarbled` -- the
+  deterministic garbling identity and cannot-help inequality
+- `rgarble` / `rowSumsTo` / `optimalRiskLeRgarbled` -- the randomized form,
+  scaled by the common row denominator `d`, no division anywhere
+- `massBlindRiskSees` -- THE HEADLINE: on a merge that erases all
+  information, the mass ledger (row sums) is UNCHANGED -- zero loss -- while
+  the best achievable risk jumps from 0 to 1. **Mass conservation cannot see
+  information loss.**
+- `massDoesNotDetermineRisk` -- two experiments with equal total mass and
+  best risks 0 and 2: mass alone never pins down the answer
+
+Checks: `a0 run @a0n/maybe:test:blackwell` and
+`a0 run @a0n/maybe:typecheck:blackwell`.
+
+### Finite Farkas and the infrathin margin (`tensor-bayes-farkas.ts`)
+
+Mirrors `Gnosis.FiniteFarkas` and `Gnosis.FarkasInfrathin`. A Farkas
+certificate is a nonnegative-multiplier combination of a system's own linear
+constraints whose weighted coefficients cancel to zero while the weighted
+constant ("margin") is negative -- a nonnegative sum of true inequalities
+collapsing to a false one. `checkCertificate` verifies the structure exactly;
+`certificateInfeasible` proves soundness directly (a weighted-slack
+contradiction), not by bounded search.
+
+The centrepiece is the INFRATHIN reading of the feasible/infeasible boundary:
+over `Int`, "strictly negative" and "at most -1" are the SAME predicate, so
+no certificate can have a margin strictly between -1 and 0 -- the tightest
+infeasible system (`tightBad`, margin -1) and the loosest feasible one
+(`tightGood`, margin 0) are ADJACENT with no interior (`intCovers(-1, 0)`).
+Over the RATIONALS this is FALSE: `rationalMarginFillsTheGap` halves the
+exact same certificate and lands on margin `-1/2`, which genuinely sits
+inside the gap that is empty over `Int`. The infrathin membrane is a
+consequence of integrality, not of Farkas itself.
+
+- `con2Holds` / `sumA` / `sumB` / `sumC` / `checkCertificate` -- the
+  cleared-denominator constraint and certificate structure, general over any
+  list
+- `certificateInfeasible` -- soundness by direct weighted-slack contradiction
+- `intCovers` / `intLtZeroIffLeNegOne` -- the integer cover relation and the
+  arithmetic fact the whole module turns on
+- `tightBad` / `tightGood` / `tightFeasibleAtZero` -- the concrete adjacent
+  pair: margin -1 (infeasible) beside margin 0 (feasible at `x=0`)
+- `rationalMarginFillsTheGap` -- THE CONTRAST: the same certificate halved
+  gives margin -1/2 over the rationals, strictly inside the gap
+- `marginNeedsNonneg` -- nonnegativity is load-bearing: a mixed-sign
+  combination reaches margin -1 on a system that IS feasible
+
+SCOPE, stated honestly: this mirrors the certificate definition and its
+soundness in full generality, and the feasible-XOR-certificate alternative at
+the concrete tight pair -- not the general arbitrary-length Fourier-Motzkin
+elimination `Gnosis.FiniteFarkas` proves for the full "exactly one"
+alternative.
+
+Checks: `a0 run @a0n/maybe:test:farkas` and
+`a0 run @a0n/maybe:typecheck:farkas`.
+
 ### Classic urn (`urn.ts`)
 
 The familiar urn of Laplace smoothing, read through the same clamp. A count

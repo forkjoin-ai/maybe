@@ -336,6 +336,198 @@
         }
       }
     },
+    "test:laplace-gap": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/tensor-bayes-laplace-gap.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the Laplace-vs-frequency gap: the sharp over/under bounds, exactness at the uniform share, the explicit vanishing threshold N0=K*q, and the honest adversarial duals (symmetric-claim blindspot, missing guards).",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/tensor-bayes-laplace-gap.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:laplace-gap": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/tensor-bayes-laplace-gap.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the Laplace gap library file (exact BigInt cross-multiplied inequalities, no floating-point division).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/tensor-bayes-laplace-gap.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:johnson": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/tensor-bayes-johnson.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the Johnson scheme J(11,2) on the 55 axes: degrees 18/36, the SRG identity A*A=18I+9A+4D and its reduced form, lambda=9/mu=4, the star and quadrilateral spectrum witnesses at every axis, and the lower-bound-only eigenvalue multiplicities.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/tensor-bayes-johnson.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:johnson": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/tensor-bayes-johnson.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the Johnson scheme library file (55x55 integer matrix arithmetic, star/quadrilateral eigenvector witnesses).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/tensor-bayes-johnson.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:blackwell": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/tensor-bayes-blackwell.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the easy Blackwell direction (garbling cannot help, deterministic and randomized/scaled) and its headline dual: on a merge, the mass ledger reads zero loss while the best achievable risk jumps from 0 to 1.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/tensor-bayes-blackwell.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:blackwell": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/tensor-bayes-blackwell.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the Blackwell library file (deterministic and randomized garbling, Bayes risk, mass-conservation vs. risk duals).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/tensor-bayes-blackwell.ts"
+            ]
+          }
+        }
+      }
+    },
+    "test:farkas": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/tensor-bayes-farkas.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify finite Farkas certificate soundness, the tight infeasible/feasible pair with margin -1 adjacent to margin 0, the integer infrathin cover, and its rational-boundary contrast (the same certificate halved lands strictly inside the gap that is empty over Int).",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/tensor-bayes-farkas.test.ts"
+            ]
+          }
+        }
+      }
+    },
+    "typecheck:farkas": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster x tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node src/tensor-bayes-farkas.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Strict-check the finite Farkas library file (exact BigInt certificate arithmetic, the integer cover relation, no rational type constructed).",
+            "args": [
+              "../../open-source/gnosis/bin/gnode.js",
+              "x",
+              "tsc",
+              "--noEmit",
+              "--strict",
+              "--target",
+              "ES2022",
+              "--module",
+              "ESNext",
+              "--moduleResolution",
+              "bundler",
+              "--skipLibCheck",
+              "--types",
+              "node",
+              "src/tensor-bayes-farkas.ts"
+            ]
+          }
+        }
+      }
+    },
     "typecheck": {
       "executor": "a0:run-commands",
       "dependsOn": [
