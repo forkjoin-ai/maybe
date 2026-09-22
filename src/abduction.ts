@@ -739,7 +739,7 @@ export function mapVoid(
   };
   const base = buildChannels(space, present, absent, opts.hardWallHi, opts.hardWallLo);
   const wasm = getAbductionWasm();
-  return wasm ? mapVoidWasm(wasm, space, base, sampling) : mapVoidTs(space, base, sampling);
+  return wasm && wasm.map_void ? mapVoidWasm(wasm, space, base, sampling) : mapVoidTs(space, base, sampling);
 }
 
 function mapVoidWasm(
@@ -753,7 +753,7 @@ function mapVoidWasm(
   const perturbable = new Uint8Array(active.length);
   for (let i = 0; i < active.length; i++) perturbable[i] = active[i]!.feature === '(prior)' ? 0 : 1;
   // Output layout: [mass(n), top(n), survival(n), entropySum].
-  const out = wasm.map_void(
+  const out = wasm.map_void!(
     rejectionFlat, weights, hardwallFlat, perturbable,
     n, active.length, outerSamples, innerSamples, jitter, lambda, seed >>> 0,
   );
@@ -830,7 +830,11 @@ export interface AbductionWasm {
     rejection_flat: Float64Array, weights: Float64Array, hardwall_flat: Uint8Array,
     n: number, n_channels: number, lambda: number,
   ): Float64Array;
-  map_void(
+  /**
+   * Optional. A kernel that provides only \`fuse_god_formula\` is valid; the
+   * nested-Monte-Carlo void map then stays on the pure-TS path.
+   */
+  map_void?(
     base_rejection_flat: Float64Array, base_weights: Float64Array, base_hardwall_flat: Uint8Array,
     perturbable: Uint8Array, n: number, n_channels: number, outer: number, inner: number,
     jitter: number, lambda: number, seed: number,
