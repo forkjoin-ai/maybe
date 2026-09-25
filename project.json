@@ -186,6 +186,24 @@
         }
       }
     },
+    "test:skip-step": {
+      "executor": "a0:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "open-source/maybe",
+        "command": "../gnosis/bin/monster test src/skip-step.test.ts",
+        "monster": {
+          "nodeLeaf": {
+            "reason": "Verify the predictability skip-step boundary: charges determine act, waste is blind, the future leaves the past free, and future-plus-gauge recovers it.",
+            "args": [
+              "../gnosis/bin/gnode.js",
+              "test",
+              "src/skip-step.test.ts"
+            ]
+          }
+        }
+      }
+    },
     "typecheck:urn": {
       "executor": "a0:run-commands",
       "cache": false,

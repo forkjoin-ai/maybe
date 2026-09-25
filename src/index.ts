@@ -763,3 +763,6 @@ export {
 // Re-exported as a namespace because the module exposes ~60 symbols and `collapseRange`
 // collides with the execution-router export.
 export * as qualityLadder from './quality-ladder.js';
+
+// Predictability / skip-step for the Bule cost algebra (Gnosis.Predictability mirror).
+export * as skipStep from './skip-step.js';
