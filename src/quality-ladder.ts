@@ -248,9 +248,19 @@ export function tableFootprintBytes(d: number): number {
   return 8 * (d + 1);
 }
 
-/** Table footprint in kibibytes (binary KB, matching the Hope Jar budget unit). */
+/** Table footprint in kibibytes (binary KB, matching the Hope Jar budget unit).
+ *
+ *  Rounded **up**, as `bytes_to_budget_kb` (Rust) and `bytesToBudgetKb` (Lean) both
+ *  do: a table that does not fit a range must not silently claim it.
+ *
+ *  This previously returned a bare `bytes / 1024`, which is fractional, so the
+ *  reported value disagreed with both other languages for any byte count that is
+ *  not a multiple of 1024 (at `d = 64`: `0.507813` here against `1` there). The
+ *  TIER was never affected — `ceil(x) > c` and `x > c` agree for integer `c` — but
+ *  the number is the budget unit this doc names, so it now matches the contract and
+ *  the other two implementations. */
 export function tableFootprintKb(d: number): number {
-  return tableFootprintBytes(d) / 1024;
+  return Math.ceil(tableFootprintBytes(d) / 1024);
 }
 
 export interface TableSoftmaxResult {

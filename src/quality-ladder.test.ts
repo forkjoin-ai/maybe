@@ -10,6 +10,7 @@ import {
   selectTier,
   prewarmPlan,
   tableFootprintBytes,
+  tableFootprintKb,
   fibonacciHashId,
   valueAggregate,
   linearSufficientStatistic,
@@ -225,6 +226,30 @@ describe('quality ladder -- selectTier budget boundaries', () => {
     ];
     for (const [budget, tier] of cases) {
       expect(hopeTierFromBudget(budget)).toBe(tier);
+    }
+  });
+
+  it('rounds the table footprint up, matching Rust and Lean', () => {
+    // Pin the bytes -> KB rounding three ways: `bytes_to_budget_kb` (Rust) and
+    // `Gnosis.HopeJarLadder.bytesToBudgetKb` (Lean) both round up. A bare
+    // `bytes / 1024` is fractional and disagrees with both (d = 64: 0.507813 vs 1).
+    expect(tableFootprintBytes(64)).toBe(520);
+    expect(tableFootprintKb(64)).toBe(1);
+    expect(tableFootprintKb(127)).toBe(1); // 1024 bytes exactly
+    expect(tableFootprintKb(128)).toBe(2); // 1032 bytes, rounds up
+    // The four ceilings in bytes: the byte below is the KB, and the tier steps
+    // one KB past it. `at / 8 - 1` is the `d` whose footprint is exactly `at` bytes.
+    const boundaries: ReadonlyArray<readonly [number, HopeTier, HopeTier]> = [
+      [64, 'E6', 'E7'],
+      [512, 'E7', 'E8'],
+      [5_000, 'E8', 'Leech'],
+      [50_000, 'Leech', 'Kaiju'],
+    ];
+    for (const [kb, lower, upper] of boundaries) {
+      const atBytes = kb * 1024;
+      expect(tableFootprintKb(atBytes / 8 - 1)).toBe(kb);
+      expect(hopeTierFromBudget(kb)).toBe(lower);
+      expect(hopeTierFromBudget(kb + 1)).toBe(upper);
     }
   });
 
