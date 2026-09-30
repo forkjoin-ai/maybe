@@ -205,6 +205,29 @@ describe('quality ladder -- selectTier budget boundaries', () => {
     }
   });
 
+  it('pins the shipped boundary table shared with Lean and Rust', () => {
+    // The same ten cases as Gnosis.HopeJarLadder.tierOfBudget_matches_shipped_bands
+    // (Lean SSOT) and hope_jar_tiered::tests::from_budget_matches_the_shipped_boundary_table
+    // (Rust). All three are the same if-chain over the same four ceilings, and this
+    // table is where an off-by-one would show. The boundary is inclusive on the
+    // lower tier: 64 closes E6, 65 opens E7.
+    const cases: ReadonlyArray<readonly [number, HopeTier]> = [
+      [0, 'E6'],
+      [64, 'E6'],
+      [65, 'E7'],
+      [512, 'E7'],
+      [513, 'E8'],
+      [5_000, 'E8'],
+      [5_001, 'Leech'],
+      [50_000, 'Leech'],
+      [50_001, 'Kaiju'],
+      [100_000, 'Kaiju'],
+    ];
+    for (const [budget, tier] of cases) {
+      expect(hopeTierFromBudget(budget)).toBe(tier);
+    }
+  });
+
   it('downgrades under high load and refuses to charge a table that does not fit', () => {
     const loaded = selectTier({ budgetKb: 10_000, d: 64, load: 0.9 });
     expect(loaded.tier).toBe('TABLE');
