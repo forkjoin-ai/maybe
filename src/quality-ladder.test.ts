@@ -229,27 +229,35 @@ describe('quality ladder -- selectTier budget boundaries', () => {
     }
   });
 
-  it('rounds the table footprint up, matching Rust and Lean', () => {
-    // Pin the bytes -> KB rounding three ways: `bytes_to_budget_kb` (Rust) and
-    // `Gnosis.HopeJarLadder.bytesToBudgetKb` (Lean) both round up. A bare
-    // `bytes / 1024` is fractional and disagrees with both (d = 64: 0.507813 vs 1).
+  it('separates the exact footprint from the rounded-up budget', () => {
+    // Two conversions with two names, the same split the Rust side keeps:
+    //   tableFootprintKb  here / table_footprint_kb  (Rust): EXACT ratio, fractional
+    //   bytesToBudgetKb (Lean) / bytes_to_budget_kb (Rust): rounds UP for budgets
+    // They never disagree about the TIER -- `ceil(x) > c` and `x > c` agree for
+    // integer `c` -- but they are different numbers for the same table.
     expect(tableFootprintBytes(64)).toBe(520);
-    expect(tableFootprintKb(64)).toBe(1);
+    expect(tableFootprintKb(64)).toBe(520 / 1024);
     expect(tableFootprintKb(127)).toBe(1); // 1024 bytes exactly
-    expect(tableFootprintKb(128)).toBe(2); // 1032 bytes, rounds up
-    // The four ceilings in bytes: the byte below is the KB, and the tier steps
-    // one KB past it. `at / 8 - 1` is the `d` whose footprint is exactly `at` bytes.
-    const boundaries: ReadonlyArray<readonly [number, HopeTier, HopeTier]> = [
-      [64, 'E6', 'E7'],
-      [512, 'E7', 'E8'],
-      [5_000, 'E8', 'Leech'],
-      [50_000, 'Leech', 'Kaiju'],
+    expect(tableFootprintKb(128)).toBe(1032 / 1024); // fractional, not rounded
+    expect(Math.ceil(tableFootprintKb(64))).toBe(1); // the budget conversion
+    expect(Math.ceil(tableFootprintKb(128))).toBe(2);
+
+    // Each ceiling in bytes: `d = kb * 128 - 1` gives a footprint of exactly
+    // `kb * 1024`, and one more score steps the tier. `8 * (d + 1) = kb * 1024`
+    // means `d + 1 = kb * 128` -- so the table's SCORE DIMENSION boundary is
+    // `kb * 128 - 1 | kb * 128`, pinned here and in the Lean/Rust tests.
+    const boundaries: ReadonlyArray<readonly [number, number, HopeTier, HopeTier]> = [
+      [64, 128, 'E6', 'E7'],
+      [512, 128, 'E7', 'E8'],
+      [5_000, 128, 'E8', 'Leech'],
+      [50_000, 128, 'Leech', 'Kaiju'],
     ];
-    for (const [kb, lower, upper] of boundaries) {
-      const atBytes = kb * 1024;
-      expect(tableFootprintKb(atBytes / 8 - 1)).toBe(kb);
-      expect(hopeTierFromBudget(kb)).toBe(lower);
-      expect(hopeTierFromBudget(kb + 1)).toBe(upper);
+    for (const [kb, perKb, lower, upper] of boundaries) {
+      const lastD = kb * perKb - 1;
+      expect(tableFootprintBytes(lastD)).toBe(kb * 1024);
+      expect(Math.ceil(tableFootprintKb(lastD))).toBe(kb);
+      expect(hopeTierFromBudget(Math.ceil(tableFootprintKb(lastD)))).toBe(lower);
+      expect(hopeTierFromBudget(Math.ceil(tableFootprintKb(lastD + 1)))).toBe(upper);
     }
   });
 

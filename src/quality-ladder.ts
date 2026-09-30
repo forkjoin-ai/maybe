@@ -248,19 +248,22 @@ export function tableFootprintBytes(d: number): number {
   return 8 * (d + 1);
 }
 
-/** Table footprint in kibibytes (binary KB, matching the Hope Jar budget unit).
+/** The table footprint in kibibytes (binary KB) — the **exact** ratio, which is
+ *  fractional for any footprint that is not a multiple of 1024.
  *
- *  Rounded **up**, as `bytes_to_budget_kb` (Rust) and `bytesToBudgetKb` (Lean) both
- *  do: a table that does not fit a range must not silently claim it.
+ *  This is the DISPLAY conversion and it matches its Rust twin, `table_footprint_kb`
+ *  in `distributed-inference/src/hope_jar_quality.rs`, which is also
+ *  `bytes as f64 / 1024.0` and carries the same doc wording. It is **not** the
+ *  budget conversion: turning a footprint into a *budget* rounds UP, as Rust's
+ *  `bytes_to_budget_kb` (`div_ceil(1024)`) and Lean's `bytesToBudgetKb` both do, so
+ *  that a table that does not fit a range cannot claim it.
  *
- *  This previously returned a bare `bytes / 1024`, which is fractional, so the
- *  reported value disagreed with both other languages for any byte count that is
- *  not a multiple of 1024 (at `d = 64`: `0.507813` here against `1` there). The
- *  TIER was never affected — `ceil(x) > c` and `x > c` agree for integer `c` — but
- *  the number is the budget unit this doc names, so it now matches the contract and
- *  the other two implementations. */
+ *  The two do not disagree about anything observable: `ceil(x) > c` and `x > c`
+ *  agree for every integer `c`, so the TIER is identical either way. They are
+ *  different numbers for the same table (`d = 64`: `0.507813` here, `1` as a
+ *  budget), which is why they have different names on the Rust side. */
 export function tableFootprintKb(d: number): number {
-  return Math.ceil(tableFootprintBytes(d) / 1024);
+  return tableFootprintBytes(d) / 1024;
 }
 
 export interface TableSoftmaxResult {
